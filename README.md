@@ -62,6 +62,11 @@ See the [Lab Reference](LAB_REFERENCE.md) for details of what domains and tasks 
 
 ---
 
+
+## GitHub Actions overview
+
+//TODO: fill it with description
+
 ## Disclaimer
 
 This is an independent resource, not produced, endorsed, or affiliated with Anthropic.
