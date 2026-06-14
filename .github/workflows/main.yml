@@ -1,0 +1,33 @@
+name: PR Quality Check
+
+# This action triggers whenever a pull request is made against the main branch
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Claude Code Action Official
+        uses: anthropics/claude-code-action@v1
+
+      # Step 2: Set up the Node.js environment (Example test environment)
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'
+          
+      # Step 3: Install project dependencies
+      # - name: Install Dependencies
+      #   run: npm ci
+
+      # # Step 4: Run your project tests
+      # - name: Run Tests
+      #   run: npm test
+
