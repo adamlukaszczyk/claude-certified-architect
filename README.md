@@ -66,4 +66,8 @@ See the [Lab Reference](LAB_REFERENCE.md) for details of what domains and tasks 
 
 This is an independent resource, not produced, endorsed, or affiliated with Anthropic.
 
+## CI/CD Setup
+
+- testing 
+
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey)](LICENSE)
