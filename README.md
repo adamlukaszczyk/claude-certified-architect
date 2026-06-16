@@ -62,6 +62,17 @@ See the [Lab Reference](LAB_REFERENCE.md) for details of what domains and tasks 
 
 ---
 
+## GitHub Actions overview
+
+This repo uses two Claude-powered GitHub Actions workflows (in `.github/workflows/`):
+
+- **Claude Code** (`claude.yml`) — mention `@claude` in any issue or PR comment to have
+  Claude answer questions or implement changes on the branch.
+- **Claude Code Review** (`claude-code-review.yml`) — runs automatically on every pull
+  request and posts an automated code review.
+
+Both require an `ANTHROPIC_API_KEY` repository secret.
+
 ## Disclaimer
 
 This is an independent resource, not produced, endorsed, or affiliated with Anthropic.
