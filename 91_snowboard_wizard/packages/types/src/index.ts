@@ -37,6 +37,7 @@ export type Answers = {
   ridingDays?: number
   // Phase 2
   style?: RidingStyle
+  terrainMix?: string   // categorical selection from terrain_mix question
   terrain?: {
     park: number
     groomed: number

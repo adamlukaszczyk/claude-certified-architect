@@ -7,7 +7,7 @@
     - id: freestyle
       text: "Freestyle — park, rails, jumps, urban"
       weights: { flex: -2, shape: -2, camber: -1, setback: -2 }
-    - id: all_mountain
+    - id: all-mountain
       text: "All-Mountain — a bit of everything"
       weights: { flex: 0, shape: 0, camber: 0, setback: 0 }
     - id: freeride
