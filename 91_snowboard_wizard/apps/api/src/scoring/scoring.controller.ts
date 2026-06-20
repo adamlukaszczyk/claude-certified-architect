@@ -1,5 +1,5 @@
 // scoring.controller.ts - POST /api/score: stateless incremental scoring
-import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common'
+import { Controller, Post, Body } from '@nestjs/common'
 import { ScoringService } from './scoring.service'
 import { ScoreRequestDto } from './dto/score-request.dto'
 import type { PartialScores } from '@snowboard/types'
