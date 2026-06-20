@@ -89,6 +89,21 @@ This repo uses two Claude-powered GitHub Actions workflows (in `.github/workflow
 
 Both require an `ANTHROPIC_API_KEY` repository secret.
 
+## Pre-commit hook
+
+A local pre-commit hook runs the [`git-diff-reviewer`](.claude/agents/git-diff-reviewer.md) agent before every commit, giving you an inline code review before changes reach CI.
+
+**Setup:**
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+The hook uses `claude --agent git-diff-reviewer --print` and is advisory by default (never blocks a commit). To enforce a hard stop on critical findings, set `exit 1` in [`.claude/hooks/pre-commit-review.sh`](.claude/hooks/pre-commit-review.sh).
+
+Use terminal to see the suggestions. This setup does not work well with VS Code.
+
 ## Disclaimer
 
 This is an independent resource, not produced, endorsed, or affiliated with Anthropic.
