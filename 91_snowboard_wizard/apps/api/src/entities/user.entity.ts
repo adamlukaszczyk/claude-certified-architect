@@ -6,10 +6,10 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @Column({ name: 'google_id', unique: true })
+  @Column({ name: 'google_id', type: 'text', unique: true })
   googleId!: string
 
-  @Column({ unique: true })
+  @Column({ type: 'text', unique: true })
   email!: string
 
   @Column({ nullable: true, type: 'text' })

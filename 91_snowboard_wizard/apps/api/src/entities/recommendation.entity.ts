@@ -8,7 +8,7 @@ export class RecommendationEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @Column({ name: 'session_id', unique: true })
+  @Column({ name: 'session_id', type: 'uuid', unique: true })
   sessionId!: string
 
   @OneToOne(() => WizardSessionEntity, { onDelete: 'CASCADE' })
@@ -21,7 +21,7 @@ export class RecommendationEntity {
   @Column({ name: 'claude_narrative', nullable: true, type: 'text' })
   claudeNarrative!: string | null
 
-  @Column({ name: 'share_token', unique: true })
+  @Column({ name: 'share_token', type: 'text', unique: true })
   shareToken!: string
 
   @CreateDateColumn({ name: 'created_at' })
