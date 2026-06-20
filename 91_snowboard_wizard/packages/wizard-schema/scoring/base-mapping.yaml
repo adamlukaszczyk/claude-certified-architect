@@ -1,0 +1,11 @@
+# base-mapping.yaml — raw base score → base type
+dimension: base
+mappings:
+  - scoreRange: [-999, 0]
+    value: "extruded"
+    label: "Extruded Base"
+    description: "Low maintenance, holds wax less — good for casual riders"
+  - scoreRange: [1, 999]
+    value: "sintered"
+    label: "Sintered Base"
+    description: "Absorbs wax, faster on snow — requires regular waxing"

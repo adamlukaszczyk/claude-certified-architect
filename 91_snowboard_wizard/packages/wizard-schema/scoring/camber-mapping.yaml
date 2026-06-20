@@ -1,0 +1,23 @@
+# camber-mapping.yaml — raw camber score → camber profile
+dimension: camber
+mappings:
+  - scoreRange: [-999, -3]
+    value: "rocker"
+    label: "Full Rocker"
+    description: "Catch-free, floaty in powder — ideal for beginners and powder hounds"
+  - scoreRange: [-2, -1]
+    value: "flat-to-rocker"
+    label: "Flat-to-Rocker"
+    description: "Flat underfoot with rocker in tip and tail — playful with some stability"
+  - scoreRange: [0, 1]
+    value: "hybrid"
+    label: "Hybrid (CamRock)"
+    description: "Camber underfoot, rocker in tip/tail — versatile all-mountain"
+  - scoreRange: [2, 3]
+    value: "camber"
+    label: "Traditional Camber"
+    description: "Full camber — maximum pop, edge hold, and energy return"
+  - scoreRange: [4, 999]
+    value: "camber"
+    label: "Aggressive Camber"
+    description: "Full camber for aggressive carving and high-speed performance"

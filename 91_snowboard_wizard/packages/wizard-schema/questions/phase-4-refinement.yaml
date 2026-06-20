@@ -1,0 +1,94 @@
+# phase-4-refinement.yaml — Advanced refinement (opt-in, shown after initial recommendation)
+
+- id: camber_override
+  phase: 4
+  text: "Do you have a strong camber preference?"
+  options:
+    - id: traditional_camber
+      text: "Traditional camber — maximum pop and edge hold"
+      weights: { camber: 4 }
+    - id: rocker
+      text: "Rocker (reverse camber) — catch-free and floaty"
+      weights: { camber: -4 }
+    - id: flat
+      text: "Flat — stable and forgiving"
+      weights: { camber: -2 }
+    - id: hybrid
+      text: "Hybrid — I like whatever the board recommends"
+      weights: {}
+
+- id: flex_feel
+  phase: 4
+  text: "How do you want the board to feel underfoot?"
+  options:
+    - id: buttery_soft
+      text: "Buttery soft — maximum playfulness, easy pressing"
+      weights: { flex: -3 }
+    - id: medium_forgiving
+      text: "Medium — forgiving but with some snap"
+      weights: { flex: -1 }
+    - id: responsive_stiff
+      text: "Responsive stiff — surfy poppy feel when loaded"
+      weights: { flex: 2 }
+    - id: board_decides
+      text: "Let the board recommend based on my style"
+      weights: {}
+
+- id: torsional_rigidity
+  phase: 4
+  text: "Torsional rigidity preference (how much the board twists tip-to-tail)"
+  options:
+    - id: torsionally_soft
+      text: "Torsionally soft — more forgiving, easier butters"
+      weights: { flex: -1 }
+    - id: torsionally_stiff
+      text: "Torsionally stiff — precise edge-to-edge, carvey"
+      weights: { camber: 1, sidecut: 1 }
+    - id: no_preference
+      text: "No preference — let the style drive it"
+      weights: {}
+
+- id: base_maintenance
+  phase: 4
+  text: "How often do you wax and tune your board?"
+  options:
+    - id: rarely
+      text: "Rarely — I want low-maintenance"
+      weights: { base: -1 }
+    - id: occasionally
+      text: "Occasionally — a few times a season"
+      weights: { base: 0 }
+    - id: regularly
+      text: "Regularly — I tune before most trips"
+      weights: { base: 1 }
+
+- id: stance_setback
+  phase: 4
+  text: "Stance setback preference"
+  options:
+    - id: centered
+      text: "Centered — equal float front and back"
+      weights: { setback: -2 }
+    - id: slight_setback
+      text: "Slight setback — a little float in pow"
+      weights: { setback: 0 }
+    - id: aggressive_setback
+      text: "Aggressive setback — deep pow bias"
+      weights: { setback: 2 }
+
+- id: budget_range
+  phase: 4
+  text: "What is your budget range for a new board?"
+  options:
+    - id: under_400
+      text: "Under $400 — value-focused"
+      weights: { base: -1, flex: -1 }
+    - id: between_400_600
+      text: "$400–$600 — mid-range"
+      weights: {}
+    - id: between_600_900
+      text: "$600–$900 — performance-focused"
+      weights: { base: 1, flex: 1 }
+    - id: over_900
+      text: "Over $900 — top of line"
+      weights: { base: 2, flex: 2 }

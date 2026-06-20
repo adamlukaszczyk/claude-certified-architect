@@ -1,0 +1,19 @@
+# width-mapping.yaml — raw width score → waist width in mm
+dimension: width
+mappings:
+  - scoreRange: [-999, -3]
+    value: 238
+    label: "Narrow (238 mm)"
+    description: "For small boots — reduces toe/heel drag on hardpack"
+  - scoreRange: [-2, 0]
+    value: 248
+    label: "Regular (248 mm)"
+    description: "Standard width, fits most boot sizes 8–10"
+  - scoreRange: [1, 3]
+    value: 255
+    label: "Mid-wide (255 mm)"
+    description: "For larger boots or wider stances"
+  - scoreRange: [4, 999]
+    value: 263
+    label: "Wide (263 mm)"
+    description: "For boots 12+ — prevents toe/heel drag"

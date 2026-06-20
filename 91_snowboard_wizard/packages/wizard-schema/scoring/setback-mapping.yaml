@@ -1,0 +1,15 @@
+# setback-mapping.yaml — raw setback score → stance setback
+dimension: setback
+mappings:
+  - scoreRange: [-999, -1]
+    value: "centered"
+    label: "Centered"
+    description: "Equal weight distribution — freestyle and switch riding"
+  - scoreRange: [0, 2]
+    value: "slight"
+    label: "Slight Setback (10–15 mm)"
+    description: "Minor powder bias while maintaining versatility"
+  - scoreRange: [3, 999]
+    value: "aggressive"
+    label: "Aggressive Setback (20+ mm)"
+    description: "Heavy pow bias — tail-heavy for deep snow float"
