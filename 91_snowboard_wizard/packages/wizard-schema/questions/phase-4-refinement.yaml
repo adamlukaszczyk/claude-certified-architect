@@ -13,8 +13,8 @@
     - id: flat
       text: "Flat — stable and forgiving"
       weights: { camber: -2 }
-    - id: hybrid
-      text: "Hybrid — I like whatever the board recommends"
+    - id: no_camber_preference
+      text: "No preference — let the style drive it"
       weights: {}
 
 - id: flex_feel

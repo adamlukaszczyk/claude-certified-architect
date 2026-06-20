@@ -18,6 +18,6 @@ mappings:
     label: "Traditional Camber"
     description: "Full camber — maximum pop, edge hold, and energy return"
   - scoreRange: [4, 999]
-    value: "camber"
+    value: "aggressive-camber"
     label: "Aggressive Camber"
     description: "Full camber for aggressive carving and high-speed performance"
