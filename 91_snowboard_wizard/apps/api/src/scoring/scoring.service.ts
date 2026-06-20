@@ -9,17 +9,17 @@ function toAnswersKey(questionId: string): keyof Answers {
   return questionId.replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase()) as keyof Answers
 }
 
-function lookupMapping(
+function lookupMapping<T extends number | string>(
   tables: ScoringTable[],
   dimension: keyof SpecScores,
   raw: number,
-): { value: number | string; label: string } {
+): { value: T; label: string } {
   const table = tables.find(t => t.dimension === dimension)
   if (!table) throw new Error(`No scoring table for dimension: ${dimension}`)
   const mapping =
     table.mappings.find(m => raw >= m.scoreRange[0] && raw <= m.scoreRange[1]) ??
     table.mappings[0]
-  return { value: mapping.value, label: mapping.label }
+  return { value: mapping.value as T, label: mapping.label }
 }
 
 @Injectable()
@@ -73,29 +73,29 @@ export class ScoringService {
   }
 
   private buildSpecSheet(scores: SpecScores): SpecSheet {
-    const flex = lookupMapping(this.tables, 'flex', scores.flex)
-    const length = lookupMapping(this.tables, 'length', scores.length)
-    const width = lookupMapping(this.tables, 'width', scores.width)
-    const shape = lookupMapping(this.tables, 'shape', scores.shape)
-    const camber = lookupMapping(this.tables, 'camber', scores.camber)
-    const taper = lookupMapping(this.tables, 'taper', scores.taper)
-    const sidecut = lookupMapping(this.tables, 'sidecut', scores.sidecut)
-    const setback = lookupMapping(this.tables, 'setback', scores.setback)
-    const base = lookupMapping(this.tables, 'base', scores.base)
-    const float = lookupMapping(this.tables, 'float', scores.float)
+    const flex = lookupMapping<number>(this.tables, 'flex', scores.flex)
+    const length = lookupMapping<number>(this.tables, 'length', scores.length)
+    const width = lookupMapping<number>(this.tables, 'width', scores.width)
+    const shape = lookupMapping<string>(this.tables, 'shape', scores.shape)
+    const camber = lookupMapping<string>(this.tables, 'camber', scores.camber)
+    const taper = lookupMapping<number>(this.tables, 'taper', scores.taper)
+    const sidecut = lookupMapping<string>(this.tables, 'sidecut', scores.sidecut)
+    const setback = lookupMapping<string>(this.tables, 'setback', scores.setback)
+    const base = lookupMapping<string>(this.tables, 'base', scores.base)
+    const float = lookupMapping<string>(this.tables, 'float', scores.float)
 
     return {
-      lengthCm: length.value as number,
-      waistWidthMm: width.value as number,
-      flexRating: flex.value as number,
+      lengthCm: length.value,
+      waistWidthMm: width.value,
+      flexRating: flex.value,
       flexLabel: flex.label,
-      shape: shape.value as string,
-      camberProfile: camber.value as string,
-      taperMm: taper.value as number,
-      sidecutRadius: sidecut.value as string,
-      setback: setback.value as string,
-      baseType: base.value as string,
-      floatPriority: float.value as string,
+      shape: shape.value,
+      camberProfile: camber.value,
+      taperMm: taper.value,
+      sidecutRadius: sidecut.value,
+      setback: setback.value,
+      baseType: base.value,
+      floatPriority: float.value,
     }
   }
 }
