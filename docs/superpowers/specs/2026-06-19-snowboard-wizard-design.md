@@ -197,10 +197,15 @@ The spec sheet always comes from Stage 1 (fast, deterministic, no API dependency
 - `GET /auth/me` — current user profile
 - JWT PassportStrategy guard on all protected routes
 
+**Security requirements:**
+- JWT stored in httpOnly, SameSite=Strict cookie — all state-changing endpoints require CSRF defence (double-submit token or origin check)
+- `share_token` must be cryptographically random (≥128 bits, `crypto.randomBytes(32).toString('base64url')`) — short slugs or sequential IDs are not acceptable
+- Guest → user session claim requires a fresh server-side session token rotation at claim time to prevent session fixation attacks
+
 **User account features (POC scope):**
 - Save named wizard sessions (e.g., "Park setup 2026", "Powder quiver")
 - Reload and continue refining saved sessions
-- Download spec sheet as PDF (`GET /api/recommendations/:id/pdf` via Puppeteer)
+- Download spec sheet as PDF (`GET /api/recommendations/:id/pdf` via Puppeteer — isolated to a separate K8s Deployment with explicit memory/CPU limits due to Chromium footprint; not co-located with the main API pods)
 - Share read-only recommendation URL (`/result/[share_token]`) — no auth required to view
 
 *Post-POC extensions deferred by user decision.*
@@ -213,23 +218,24 @@ PostgreSQL (RDS) with JSONB for variable wizard answer structures.
 
 ```sql
 users
-  id          uuid PRIMARY KEY
-  google_id   text UNIQUE NOT NULL
+  id            uuid PRIMARY KEY
+  google_id     text UNIQUE NOT NULL
   email       text UNIQUE NOT NULL
   name        text
   avatar_url  text
   created_at  timestamptz DEFAULT now()
 
 wizard_sessions
-  id            uuid PRIMARY KEY
-  user_id       uuid REFERENCES users (nullable — guest sessions)
-  name          text
-  answers       jsonb NOT NULL         -- full branching answer set
-  scores        jsonb                  -- computed SpecScores snapshot
-  phase_reached int NOT NULL DEFAULT 1
-  completed_at  timestamptz
-  created_at    timestamptz DEFAULT now()
-  updated_at    timestamptz DEFAULT now()
+  id             uuid PRIMARY KEY
+  user_id        uuid REFERENCES users (nullable — guest sessions)
+  name           text
+  answers        jsonb NOT NULL         -- full branching answer set
+  scores         jsonb                  -- computed SpecScores snapshot
+  schema_version int NOT NULL DEFAULT 1 -- tracks question schema version for migration/replay
+  phase_reached  int NOT NULL DEFAULT 1
+  completed_at   timestamptz
+  created_at     timestamptz DEFAULT now()
+  updated_at     timestamptz DEFAULT now()
 
 recommendations
   id               uuid PRIMARY KEY
@@ -252,6 +258,7 @@ refresh_tokens
 - `user_id` nullable on `wizard_sessions` — guest sessions claimed on first login
 - `share_token` on recommendations enables public links without exposing session internals
 - `refresh_tokens` in DB (not Redis only) — enables cross-device revocation on logout
+- **Redis serves three explicit purposes:** NextAuth session store, in-progress wizard answer cache (avoids a DB write on every step), rate limiting on Claude API calls
 
 ---
 
@@ -305,7 +312,7 @@ push to main →
   2. Unit tests (turbo)
   3. Build Docker images → push to ECR
   4. kubectl apply Helm charts → EKS
-  5. TypeORM migrations (K8s Job, pre-deployment)
+  5. TypeORM migrations (K8s Job, pre-deployment, forward-only — failed migration aborts deploy via Helm hook failure policy)
 ```
 
 Helm chart structure:
@@ -357,7 +364,7 @@ Landing → [Start] → Phase 1 → Phase 2 → Phase 3 (branched)
 - **Progress indicator:** Serpentine trail animation winding down a mountain path — not a generic bar
 - **Question card:** Single question per screen; back button always visible
 - **Live profile sidebar** (desktop) / **collapsible drawer** (mobile): accumulating spec scores, updates after each answer
-- **Result page:** Two panels — spec sheet (left) + Claude narrative (right)
+- **Result page:** Two panels — spec sheet (left) + Claude narrative (right). Editing any prior answer prunes stale downstream answers that depended on the changed value before re-scoring — the live sidebar enters a transient "recalculating" state during pruning.
 - **Refinement panel:** Accordion of all answered questions; edit any → re-score + re-narrate
 - **PDF export:** `GET /api/recommendations/:id/pdf` — Puppeteer renders spec sheet server-side
 
@@ -395,7 +402,7 @@ Landing → [Start] → Phase 1 → Phase 2 → Phase 3 (branched)
 | Tool | Purpose |
 |---|---|
 | Next.js 14 App Router | SSR, shared `/result/[share_token]` pages |
-| Zustand | Wizard state (persisted to `sessionStorage` for refresh survival) |
+| Zustand | Wizard state (persisted to `localStorage` with 7-day expiry — survives tab close for guest resume) |
 | NextAuth.js | Google OAuth, session management |
 | Framer Motion | Card transitions, spring physics, layout animations |
 | GSAP | Phase transition timelines (powder burst) |
