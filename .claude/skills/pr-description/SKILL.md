@@ -1,7 +1,7 @@
 ---
-name: pr-description-2
+name: pr-description
 description: Generate a detailed and informative pull request description based on the changes made in the code.
-allowed_tools: Read, Bash
+allowed-tools: Read, Bash
 model: sonnet
 ---
 
