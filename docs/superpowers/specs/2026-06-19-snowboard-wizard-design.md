@@ -198,10 +198,13 @@ The spec sheet always comes from Stage 1 (fast, deterministic, no API dependency
 - JWT PassportStrategy guard on all protected routes
 
 **Security requirements:**
-- NextAuth session cookie: httpOnly, SameSite=Lax (Strict breaks Google OAuth redirect callback), Secure in production
-- State-changing endpoints require CSRF defence via origin header check (NextAuth default) — no custom double-submit needed when SameSite=Lax + HTTPS
+**Auth boundary:** NextAuth (Next.js) owns the Google OAuth flow and the browser-facing session cookie (httpOnly, SameSite=Lax — Strict breaks the Google redirect callback, Secure in production). On successful login, NextAuth calls `POST /auth/google` on NestJS, which issues its own short-lived JWT. All subsequent Next.js → NestJS API calls carry this JWT as a Bearer token. The two layers are distinct: NextAuth manages the browser session; NestJS validates JWTs on every API request via PassportStrategy(jwt).
+
+**CSRF:** SameSite=Lax provides defence-in-depth but is not sufficient alone. All state-changing NestJS endpoints must verify the `Origin` or `Referer` header against an allow-list. NextAuth's built-in CSRF protection applies only to its own `/api/auth/*` routes — it does not extend to the NestJS API.
+
+**Token security:**
 - `share_token` must be cryptographically random (≥128 bits, `crypto.randomBytes(32).toString('base64url')`) — short slugs or sequential IDs are not acceptable
-- Guest → user session claim must rotate the session identifier on privilege elevation to prevent session fixation
+- Guest → user session claim must rotate the session identifier and invalidate the prior guest session server-side to prevent session fixation
 
 **User account features (POC scope):**
 - Save named wizard sessions (e.g., "Park setup 2026", "Powder quiver")
