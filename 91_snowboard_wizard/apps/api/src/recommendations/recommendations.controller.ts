@@ -1,7 +1,8 @@
 // recommendations.controller.ts - POST/GET recommendations endpoints
-import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus, NotFoundException, HttpException } from '@nestjs/common'
+import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus, NotFoundException, HttpException, UseGuards, ParseUUIDPipe } from '@nestjs/common'
 import { RecommendationsService } from './recommendations.service'
 import { CreateRecommendationDto } from './dto/create-recommendation.dto'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 @Controller('recommendations')
 export class RecommendationsController {
@@ -10,7 +11,7 @@ export class RecommendationsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateRecommendationDto) {
-    return this.service.create(dto.answers, null, dto.sessionName ?? null)
+    return this.service.create(dto.answers, null /* TODO(Task 7): extract userId from JWT claims */, dto.sessionName ?? null)
   }
 
   @Get('share/:token')
@@ -20,8 +21,9 @@ export class RecommendationsController {
     return rec
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getById(@Param('id') id: string) {
+  async getById(@Param('id', new ParseUUIDPipe()) id: string) {
     const rec = await this.service.findById(id)
     if (!rec) throw new NotFoundException('Recommendation not found')
     return rec

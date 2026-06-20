@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
+import { DataSource } from 'typeorm'
 import { RecommendationsService } from './recommendations.service'
 import { RecommendationEntity } from '../entities/recommendation.entity'
 import { WizardSessionEntity } from '../entities/wizard-session.entity'
@@ -28,10 +29,24 @@ const mockRecommendationRepo = {
   findOne: jest.fn(),
 }
 
+// Mock manager routes save() calls to the appropriate repo mock so existing assertions hold
+const mockManager = {
+  save: jest.fn().mockImplementation((EntityClass: unknown, data: unknown) => {
+    if (EntityClass === WizardSessionEntity) return mockSessionRepo.save(data)
+    if (EntityClass === RecommendationEntity) return mockRecommendationRepo.save(data)
+    return Promise.resolve(data)
+  }),
+}
+
+const mockDataSource = {
+  transaction: jest.fn().mockImplementation((cb: (manager: typeof mockManager) => Promise<unknown>) => cb(mockManager)),
+}
+
 describe('RecommendationsService', () => {
   let service: RecommendationsService
 
   beforeEach(async () => {
+    jest.clearAllMocks()
     const module = await Test.createTestingModule({
       providers: [
         RecommendationsService,
@@ -39,6 +54,7 @@ describe('RecommendationsService', () => {
         { provide: NarrativeService, useValue: mockNarrativeService },
         { provide: getRepositoryToken(RecommendationEntity), useValue: mockRecommendationRepo },
         { provide: getRepositoryToken(WizardSessionEntity), useValue: mockSessionRepo },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile()
     service = module.get(RecommendationsService)
@@ -58,6 +74,11 @@ describe('RecommendationsService', () => {
   it('create() share_token is URL-safe base64 (no +, /, =)', async () => {
     const result = await service.create({}, null, null)
     expect(result.shareToken).toMatch(/^[A-Za-z0-9_-]+$/)
+  })
+
+  it('create() wraps both saves in a single transaction', async () => {
+    await service.create({}, null, null)
+    expect(mockDataSource.transaction).toHaveBeenCalledTimes(1)
   })
 
   it('findByShareToken() calls findOne with the share token', async () => {
