@@ -77,10 +77,10 @@ describe('ScoringService', () => {
     expect(specSheet.flexLabel).toBe('Medium-Stiff')
   })
 
-  it('score() powder style returns a valid shape value', () => {
+  it('score() powder style maps to directional shape', () => {
     // powder gives shape+3 → scoreRange [2,4] → "directional"
     const answers: Answers = { style: 'powder' }
     const { specSheet } = service.score(answers)
-    expect(['twin', 'directional-twin', 'directional', 'tapered-directional']).toContain(specSheet.shape)
+    expect(specSheet.shape).toBe('directional')
   })
 })
