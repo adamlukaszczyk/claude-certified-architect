@@ -17,6 +17,22 @@ Build working code for each of the 6 exam scenarios so you can apply the concept
 
 ---
 
+## MCP Workshop
+
+Beyond the six certification labs, [`90_mcp_workshop/`](90_mcp_workshop/) is a standalone, hands-on exercise for **building an MCP (Model Context Protocol) client and server from scratch**.
+
+It implements **MCP Chat** — a command-line application that connects an Anthropic-powered chat loop to an MCP server and demonstrates the three core MCP primitives end to end:
+
+- **Tools** — `read_doc_contents` and `edit_document` document operations on a FastMCP server.
+- **Resources** — `docs://documents` and `docs://documents/{doc_id}` expose document IDs and contents to the host.
+- **Prompts** — server-defined `/` commands (e.g. `/format`) that the CLI auto-completes and runs.
+
+The client (`MCPClient`) manages the server connection lifecycle over the `stdio` transport, while the `core/` package wraps the Claude API, dispatches tool calls between Claude and the MCP server, and drives a `prompt-toolkit` CLI with `@document` retrieval and command auto-completion. Some pieces (e.g. a `summarize` prompt) are intentionally left as `TODO`s for workshop participants to implement.
+
+This subproject uses `uv` / `pyproject.toml` rather than the per-lab `requirements.txt` + `manage.py` flow. See its [README](90_mcp_workshop/README.md) for setup and usage.
+
+---
+
 ## How to Use
 
 ### Prerequisites

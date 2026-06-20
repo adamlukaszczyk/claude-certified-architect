@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Six standalone labs for the Claude Certified Architect (CCA) Foundations certification. Each lab is a working implementation that maps to the 5 exam domains and 30 task statements in the official exam guide. Labs are ordered by complexity and can be run independently.
 
+The repo also contains `90_mcp_workshop/` — a hands-on workshop subproject (separate from the numbered certification labs) for building an MCP client and server from scratch. See [MCP Workshop](#mcp-workshop-90_mcp_workshop) below.
+
 ## Lab Commands
 
 Each lab directory contains a `manage.py` script:
@@ -74,3 +76,30 @@ These apply across all labs:
 ## Exam Domain Mapping
 
 `LAB_REFERENCE.md` in the repo root contains the full mapping from each lab/file to the 5 exam domains and 30 task statements. Check it when adding or modifying lab content to ensure coverage is preserved.
+
+## MCP Workshop (`90_mcp_workshop`)
+
+A standalone, hands-on workshop for building an **MCP (Model Context Protocol) client and server** practical exercise — separate from the numbered certification labs. It implements "MCP Chat", a command-line application that connects an Anthropic-powered chat loop to an MCP server, demonstrating the three core MCP primitives end to end: **tools**, **resources**, and **prompts**.
+
+**Purpose:** give learners a working, minimal MCP stack they can read, run, and extend — to internalize how a host application discovers and invokes server-side capabilities over the MCP protocol.
+
+**Architecture:**
+
+- `mcp_server.py` — a FastMCP server (`DocumentMCP`) exposing document operations: `read_doc_contents` / `edit_document` **tools**, `docs://documents` and `docs://documents/{doc_id}` **resources**, and a `format` **prompt**. Runs over the `stdio` transport.
+- `mcp_client.py` — an MCP client (`MCPClient`) that manages the server connection lifecycle via `AsyncExitStack` and wraps `list_tools` / `call_tool` / `list_prompts` / `get_prompt` / `read_resource`.
+- `core/` — the chat application: `claude.py` (Anthropic API wrapper), `tools.py` (tool dispatch between Claude and MCP servers), `chat.py` / `cli_chat.py` (chat loop, `@document` retrieval, `/command` prompts), and `cli.py` (prompt-toolkit CLI with resource/command auto-completion).
+- `main.py` — entry point wiring the Anthropic client, MCP client(s), and CLI together.
+
+**Conventions:** this workshop is an independent teaching artifact and does **not** follow the numbered-lab conventions documented above (no `config.py`, no `manage.py` restart/solve flow, prompts as inline strings, `raise ValueError` for tool errors). Treat it on its own terms; do not "fix" it to match the lab conventions unless explicitly asked.
+
+**Setup & run** (uses `uv` and `pyproject.toml`, not `requirements.txt`):
+
+```bash
+cd 90_mcp_workshop
+uv venv && source .venv/bin/activate
+uv pip install -e .          # or: pip install anthropic python-dotenv prompt-toolkit "mcp[cli]==1.8.0"
+echo 'ANTHROPIC_API_KEY="..."' > .env   # add your Anthropic API key
+uv run main.py
+```
+
+Parts of the server (e.g. the `summarize` prompt) are intentionally left as `# TODO` for workshop participants to implement.
