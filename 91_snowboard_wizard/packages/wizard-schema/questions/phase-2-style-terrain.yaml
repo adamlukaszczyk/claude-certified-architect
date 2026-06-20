@@ -1,0 +1,61 @@
+# phase-2-style-terrain.yaml — Style & Terrain questions (shown to all users)
+
+- id: style
+  phase: 2
+  text: "What is your primary riding style?"
+  options:
+    - id: freestyle
+      text: "Freestyle — park, rails, jumps, urban"
+      weights: { flex: -2, shape: -2, camber: -1, setback: -2 }
+    - id: all_mountain
+      text: "All-Mountain — a bit of everything"
+      weights: { flex: 0, shape: 0, camber: 0, setback: 0 }
+    - id: freeride
+      text: "Freeride — off-piste, big mountain"
+      weights: { flex: 2, shape: 2, camber: 1, setback: 2, float: 2 }
+    - id: carving
+      text: "Carving — groomed arcs, edge-to-edge"
+      weights: { flex: 2, shape: 1, camber: 3, sidecut: 2 }
+    - id: powder
+      text: "Powder — deep snow, float and surf"
+      weights: { flex: 1, shape: 3, taper: 3, float: 4, setback: 3, camber: -1 }
+    - id: splitboard
+      text: "Splitboard — backcountry touring"
+      weights: { flex: 2, shape: 2, taper: 2, float: 2, setback: 2 }
+
+- id: terrain_mix
+  phase: 2
+  text: "Which terrain best describes your typical day? (choose the closest)"
+  options:
+    - id: mostly_park
+      text: "Mostly park / groomed (80%+ park)"
+      weights: { flex: -2, shape: -2, setback: -2 }
+    - id: groomed_dominant
+      text: "Groomed dominant with some off-piste (60% groomed)"
+      weights: { flex: -1, shape: -1, setback: -1 }
+    - id: mixed_even
+      text: "Even mix of groomed and off-piste"
+      weights: { flex: 0, shape: 0, setback: 0 }
+    - id: offpiste_dominant
+      text: "Off-piste dominant with some groomed (60% off-piste)"
+      weights: { flex: 1, float: 1, taper: 1, setback: 1 }
+    - id: mostly_backcountry
+      text: "Mostly backcountry / untracked (80%+)"
+      weights: { flex: 2, float: 2, taper: 2, setback: 2 }
+
+- id: snow_condition
+  phase: 2
+  text: "What snow conditions do you ride most often?"
+  options:
+    - id: hardpack
+      text: "Hardpack and groomed — firm, predictable"
+      weights: { camber: 2, sidecut: 2, base: 1, taper: -1 }
+    - id: powder
+      text: "Powder — deep and soft"
+      weights: { camber: -2, taper: 3, float: 3, base: -1 }
+    - id: mixed
+      text: "Mixed — whatever the mountain throws at me"
+      weights: { camber: 0, taper: 0, base: 0 }
+    - id: ice
+      text: "Ice and variable — bulletproof and aggressive"
+      weights: { camber: 3, sidecut: 3, flex: 2, base: 2 }
