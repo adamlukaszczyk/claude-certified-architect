@@ -2,5 +2,6 @@ node_modules/
 dist/
 .turbo/
 .env.local
+*.env.local
 .env
 package-lock.json
