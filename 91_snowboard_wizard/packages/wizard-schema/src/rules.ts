@@ -3,7 +3,7 @@
 
 import type { Answers, PartialScores } from '@snowboard/types'
 
-export const rules: Record<string, (a: Answers, s?: PartialScores) => boolean> = {
+export const rules = {
   isFreestyle: (a) =>
     a.style === 'freestyle',
 
@@ -25,4 +25,7 @@ export const rules: Record<string, (a: Answers, s?: PartialScores) => boolean> =
     (a.style === 'powder' || a.style === 'freeride') &&
     a.experience !== 'beginner' &&
     (s?.flex ?? 0) >= 5,
-}
+} satisfies Record<string, (a: Answers, s?: PartialScores) => boolean>
+
+// Derived from the registry so it can't drift from the actual rule keys
+export type RuleName = keyof typeof rules
