@@ -85,7 +85,7 @@ export function loadQuestions(
   const questionsDir = path.join(schemaRoot, 'questions')
   const files = fs
     .readdirSync(questionsDir)
-    .filter((f) => f.endsWith('.yaml'))
+    .filter((f: string) => f.endsWith('.yaml'))
     .sort()
 
   const allRaw: unknown[] = []
@@ -117,10 +117,10 @@ export function loadScoringTables(schemaRoot: string): ScoringTable[] {
   const scoringDir = path.join(schemaRoot, 'scoring')
   const files = fs
     .readdirSync(scoringDir)
-    .filter((f) => f.endsWith('.yaml'))
+    .filter((f: string) => f.endsWith('.yaml'))
     .sort()
 
-  return files.map((file) => {
+  return files.map((file: string) => {
     const filePath = path.join(scoringDir, file)
     return loadYamlFile(filePath, ScoringTableSchema) as ScoringTable
   })
