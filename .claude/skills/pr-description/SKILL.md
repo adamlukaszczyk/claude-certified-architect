@@ -7,9 +7,9 @@ model: sonnet
 
 This uses https://agentskills.io/ standard.
 
-- Write PR description in Markdown format. 
+- Write PR description in Markdown format in code formatter. do not format the text. 
 - Provide general purpose of the PR. 
-- Include a list of files with very short overview of changes in each file. 
+- Include a list of files with very short overview of changes in each file. Don't use table format, just bullet points.
 - Provide short test plan.
 
 When asked about architecture load [references/architecture.md](references/architecture.md).
