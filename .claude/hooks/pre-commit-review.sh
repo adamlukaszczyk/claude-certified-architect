@@ -19,5 +19,7 @@ echo "Review the staged changes before this commit." | claude \
     --print \
     --allowedTools "Bash(git diff*),Bash(git log*),Bash(git status*),Read"
 
+sleep 1s
+
 # Exit 0 — review is advisory; change to exit 1 to block on critical findings
 exit 0
