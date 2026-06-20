@@ -1,0 +1,31 @@
+# phase-3-allmountain.yaml — All-mountain deep dive (showIf: isAllMountain)
+
+- id: groomed_offpiste_split
+  phase: 3
+  text: "On a typical resort day, how do you split your time?"
+  showIf: isAllMountain
+  options:
+    - id: mostly_groomed
+      text: "Mostly groomed (70%+ on-piste)"
+      weights: { camber: 1, sidecut: 1, flex: 1, setback: -1 }
+    - id: even_split
+      text: "Even split — groomed morning, off-piste afternoon"
+      weights: { camber: 0, flex: 0, setback: 0 }
+    - id: mostly_offpiste
+      text: "Mostly off-piste (70%+ off-piste, trees, bumps)"
+      weights: { camber: -1, float: 1, taper: 1, setback: 1 }
+
+- id: speed_preference
+  phase: 3
+  text: "What is your preferred pace on the mountain?"
+  showIf: isAllMountain
+  options:
+    - id: mellow
+      text: "Mellow — I enjoy the ride, not the speed"
+      weights: { flex: -1, camber: -1 }
+    - id: moderate
+      text: "Moderate — I push it but ride in control"
+      weights: { flex: 0, camber: 0 }
+    - id: fast
+      text: "Fast — I chase speed and thrive at high velocity"
+      weights: { flex: 2, camber: 2, sidecut: 1 }

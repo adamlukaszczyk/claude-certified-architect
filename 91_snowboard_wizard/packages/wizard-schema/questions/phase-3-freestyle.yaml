@@ -1,0 +1,55 @@
+# phase-3-freestyle.yaml — Freestyle deep dive (showIf: isFreestyle)
+
+- id: park_feature_focus
+  phase: 3
+  text: "What park features do you spend most time on?"
+  showIf: isFreestyle
+  options:
+    - id: rails_boxes
+      text: "Rails and boxes"
+      weights: { flex: -2, shape: -3 }
+    - id: jumps_kickers
+      text: "Jumps and kickers"
+      weights: { flex: -1, shape: -1, camber: 1 }
+    - id: halfpipe
+      text: "Halfpipe"
+      weights: { flex: 1, shape: -2, camber: 2, sidecut: 1 }
+    - id: urban_street
+      text: "Urban / street spots"
+      weights: { flex: -3, shape: -3, setback: -3 }
+
+- id: switch_frequency
+  phase: 3
+  text: "How often do you ride switch (backwards)?"
+  showIf: isFreestyle
+  options:
+    - id: rarely
+      text: "Rarely — I'm solidly regular/goofy"
+      weights: { shape: -1 }
+    - id: sometimes
+      text: "Sometimes — I can, but it's not my focus"
+      weights: { shape: 0 }
+    - id: half_half
+      text: "Half and half — equally comfortable both ways"
+      weights: { shape: -2 }
+    - id: always
+      text: "Always — switch is just as strong as regular"
+      weights: { shape: -3 }
+
+- id: preferred_tricks
+  phase: 3
+  text: "What tricks are you working toward?"
+  showIf: isFreestyle
+  options:
+    - id: butters_presses
+      text: "Butters and ground presses"
+      weights: { flex: -3, camber: -2 }
+    - id: spins_270_540
+      text: "Spins 270–540"
+      weights: { flex: -1, shape: -1 }
+    - id: spins_720_plus
+      text: "Big spins 720+"
+      weights: { flex: 0, camber: 1 }
+    - id: tech_rails
+      text: "Technical rail combos"
+      weights: { flex: -2, shape: -2, camber: -1 }
