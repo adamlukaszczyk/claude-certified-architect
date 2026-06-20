@@ -8,20 +8,29 @@ export type Option = {
   weights: Partial<SpecScores>
 }
 
-export type QuestionInputType = 'single' | 'multi' | 'numeric'
-
-export type Question = {
+type BaseQuestion = {
   id: string
   phase: 1 | 2 | 3 | 4
   text: string
-  showIf?: string           // must be a key in rules.ts at runtime
-  inputType?: QuestionInputType  // default: 'single'
-  answersKey?: keyof Answers  // for numeric inputs, which Answers field to set
-  options?: Option[]
-  min?: number              // for numeric inputs
+  showIf?: string  // validated at runtime against keys of rules.ts
+}
+
+export type OptionQuestion = BaseQuestion & {
+  inputType?: 'single' | 'multi'
+  options: Option[]
+}
+
+export type NumericQuestion = BaseQuestion & {
+  inputType: 'numeric'
+  answersKey: keyof Answers
+  min?: number
   max?: number
   unit?: string
 }
+
+export type Question = OptionQuestion | NumericQuestion
+
+export type QuestionInputType = 'single' | 'multi' | 'numeric'
 
 export type ScoreRange = [number, number]
 
