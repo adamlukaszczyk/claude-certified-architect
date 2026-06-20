@@ -67,10 +67,7 @@ describe('ScoringService', () => {
   })
 
   it('score() flex=7 maps to Medium-Stiff label (integration)', () => {
-    // Force a flex score of 7: expert(+3) + over_100(+3) + carving(+2) + ice snow(+2) + hardpack(+2) = 12 → stiff
-    // Use known combination that yields flex ∈ [5, 8] → Medium-Stiff:
-    // advanced(+1) + w_71_85(+1) + style=all-mountain(0) + hardpack(+0) = flex 2
-    // Not enough. Use: advanced(+1) + w_86_100(+2) + carving(+2) = flex 5 → Medium-Stiff
+    // advanced(+1) + w_86_100(+2) + carving(+2) = flex 5 → scoreRange [5,8] → "Medium-Stiff"
     const answers: Answers = {
       experience: 'advanced',
       weightCategory: 'w_86_100',
@@ -80,11 +77,8 @@ describe('ScoringService', () => {
     expect(specSheet.flexLabel).toBe('Medium-Stiff')
   })
 
-  it('score() powder+tapered returns tapered-directional shape', () => {
-    // powder: shape+3, offpiste terrain: shape 0, total shape=3 → scoreRange [2,4] → "directional"
-    // Need shape ≥ 5 for tapered-directional: powder(+3) + mostly_backcountry terrain(0)
-    // shape from powder=3, from terrain 0 → total 3 → "directional"
-    // So just check shape is a valid string
+  it('score() powder style returns a valid shape value', () => {
+    // powder gives shape+3 → scoreRange [2,4] → "directional"
     const answers: Answers = { style: 'powder' }
     const { specSheet } = service.score(answers)
     expect(['twin', 'directional-twin', 'directional', 'tapered-directional']).toContain(specSheet.shape)

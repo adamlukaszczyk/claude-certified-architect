@@ -5,7 +5,6 @@ import type { Question, OptionQuestion, ScoringTable } from '@snowboard/wizard-s
 import type { Answers, PartialScores, SpecScores, SpecSheet } from '@snowboard/types'
 
 // Maps snake_case question ID → camelCase Answers key
-// This is the one permitted `as` cast per global constraints
 function toAnswersKey(questionId: string): keyof Answers {
   return questionId.replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase()) as keyof Answers
 }
@@ -38,13 +37,12 @@ export class ScoringService {
   }
 
   score(answers: Answers): { scores: SpecScores; specSheet: SpecSheet } {
-    const partial = this.accumulate(answers)
-    const scores = partial as SpecScores
+    const scores = this.accumulate(answers)
     const specSheet = this.buildSpecSheet(scores)
     return { scores, specSheet }
   }
 
-  private accumulate(answers: Answers): PartialScores {
+  private accumulate(answers: Answers): SpecScores {
     const raw: Record<string, number> = {
       length: 0,
       width: 0,
@@ -71,7 +69,7 @@ export class ScoringService {
       }
     }
 
-    return raw as PartialScores
+    return raw as SpecScores
   }
 
   private buildSpecSheet(scores: SpecScores): SpecSheet {
