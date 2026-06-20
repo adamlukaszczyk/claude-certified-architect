@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Six standalone labs for the Claude Certified Architect (CCA) Foundations certification. Each lab is a working implementation that maps to the 5 exam domains and 30 task statements in the official exam guide. Labs are ordered by complexity and can be run independently.
 
+The repo also contains `90_mcp_workshop/` — a hands-on workshop subproject (separate from the numbered certification labs) for building an MCP client and server from scratch. See [MCP Workshop](#mcp-workshop-90_mcp_workshop) below.
+
 ## Lab Commands
 
 Each lab directory contains a `manage.py` script:
@@ -74,3 +76,9 @@ These apply across all labs:
 ## Exam Domain Mapping
 
 `LAB_REFERENCE.md` in the repo root contains the full mapping from each lab/file to the 5 exam domains and 30 task statements. Check it when adding or modifying lab content to ensure coverage is preserved.
+
+## MCP Workshop (`90_mcp_workshop`)
+
+A standalone, hands-on workshop for building an **MCP (Model Context Protocol) client and server** from scratch — separate from the numbered certification labs. It implements "MCP Chat", a CLI app that connects an Anthropic chat loop to a FastMCP server and demonstrates the three core MCP primitives (**tools**, **resources**, **prompts**) end to end. For its purpose, architecture, and `uv` / `pyproject.toml` setup, see the [MCP Workshop section in `README.md`](README.md#mcp-workshop) and the [subproject README](90_mcp_workshop/README.md) — not repeated here.
+
+**Conventions:** unlike the numbered labs, this workshop does **not** follow the lab conventions documented above (no `config.py`, no `manage.py` restart/solve flow, prompts as inline strings, `raise ValueError` for tool errors). Treat it on its own terms; do not "fix" it to match the lab conventions unless explicitly asked. Parts of the server (e.g. the `summarize` prompt) are intentionally left as `# TODO` for participants to implement.
