@@ -5,6 +5,11 @@ allowed-tools: Read, Bash
 model: sonnet
 ---
 
-this uses https://agentskills.io/ standard
+This uses https://agentskills.io/ standard.
 
-when asked about architecture load [references/architecture.md](references/architecture.md).
+- Write PR description in Markdown format. 
+- Provide general purpose of the PR. 
+- Include a list of files with very short overview of changes in each file. 
+- Provide short test plan.
+
+When asked about architecture load [references/architecture.md](references/architecture.md).
