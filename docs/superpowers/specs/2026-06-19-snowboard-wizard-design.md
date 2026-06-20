@@ -198,9 +198,10 @@ The spec sheet always comes from Stage 1 (fast, deterministic, no API dependency
 - JWT PassportStrategy guard on all protected routes
 
 **Security requirements:**
-- JWT stored in httpOnly, SameSite=Strict cookie — all state-changing endpoints require CSRF defence (double-submit token or origin check)
+- NextAuth session cookie: httpOnly, SameSite=Lax (Strict breaks Google OAuth redirect callback), Secure in production
+- State-changing endpoints require CSRF defence via origin header check (NextAuth default) — no custom double-submit needed when SameSite=Lax + HTTPS
 - `share_token` must be cryptographically random (≥128 bits, `crypto.randomBytes(32).toString('base64url')`) — short slugs or sequential IDs are not acceptable
-- Guest → user session claim requires a fresh server-side session token rotation at claim time to prevent session fixation attacks
+- Guest → user session claim must rotate the session identifier on privilege elevation to prevent session fixation
 
 **User account features (POC scope):**
 - Save named wizard sessions (e.g., "Park setup 2026", "Powder quiver")
