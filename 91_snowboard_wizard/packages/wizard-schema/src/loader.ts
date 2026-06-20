@@ -7,24 +7,37 @@ import { z } from 'zod'
 import { rules } from './rules'
 import type { Question, ScoringTable } from './types'
 
-const OptionSchema = z.object({
-  id: z.string(),
-  text: z.string(),
-  weights: z.record(z.number()).default({}),
-})
+const SPEC_DIMENSIONS = ['length', 'width', 'flex', 'shape', 'camber', 'taper', 'sidecut', 'setback', 'base', 'float'] as const
 
-const QuestionSchema = z.object({
+const BaseQuestionFields = {
   id: z.string(),
   phase: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   text: z.string(),
   showIf: z.string().optional(),
-  inputType: z.enum(['single', 'multi', 'numeric']).optional(),
-  answersKey: z.string().optional(),
-  options: z.array(OptionSchema).optional(),
+}
+
+const OptionSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  weights: z.record(z.enum(SPEC_DIMENSIONS), z.number()).default({}),
+})
+
+const OptionQuestionSchema = z.object({
+  ...BaseQuestionFields,
+  inputType: z.enum(['single', 'multi']).optional(),
+  options: z.array(OptionSchema).min(1),
+})
+
+const NumericQuestionSchema = z.object({
+  ...BaseQuestionFields,
+  inputType: z.literal('numeric'),
+  answersKey: z.string(),
   min: z.number().optional(),
   max: z.number().optional(),
   unit: z.string().optional(),
 })
+
+const QuestionSchema = z.union([NumericQuestionSchema, OptionQuestionSchema])
 
 const ScoreMappingSchema = z.object({
   scoreRange: z.tuple([z.number(), z.number()]),
@@ -34,7 +47,7 @@ const ScoreMappingSchema = z.object({
 })
 
 const ScoringTableSchema = z.object({
-  dimension: z.string(),
+  dimension: z.enum(SPEC_DIMENSIONS),
   mappings: z.array(ScoreMappingSchema),
 })
 
@@ -80,14 +93,18 @@ export function loadQuestions(
     const parsed = yaml.load(
       fs.readFileSync(path.join(questionsDir, file), 'utf-8')
     )
-    if (Array.isArray(parsed)) allRaw.push(...parsed)
+    if (!Array.isArray(parsed)) {
+      throw new Error(`questions/${file} must be a YAML array, got ${typeof parsed}`)
+    }
+    allRaw.push(...parsed)
   }
   allRaw.push(...extraQuestions)
 
   const questions: Question[] = allRaw.map((raw, i) => {
     const result = QuestionSchema.safeParse(raw)
     if (!result.success) {
-      throw new Error(`Question at index ${i} is invalid:\n${result.error.toString()}`)
+      const id = (raw as Record<string, unknown>)?.id ?? `index ${i}`
+      throw new Error(`Question "${id}" is invalid:\n${result.error.toString()}`)
     }
     return result.data as Question
   })

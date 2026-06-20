@@ -26,7 +26,7 @@ describe('loadQuestions', () => {
           phase: 3,
           text: 'Test?',
           showIf: 'nonExistentRule',
-          options: [],
+          options: [{ id: 'opt', text: 'Option', weights: {} }],
         },
       ])
     ).toThrow(/nonExistentRule/)
