@@ -27,6 +27,13 @@ export type FootStance = 'regular' | 'goofy'
 
 export type SnowCondition = 'hardpack' | 'powder' | 'mixed' | 'ice'
 
+export type TerrainMix =
+  | 'mostly_park'
+  | 'groomed_dominant'
+  | 'mixed_even'
+  | 'offpiste_dominant'
+  | 'mostly_backcountry'
+
 export type Answers = {
   // Phase 1
   heightCategory?: string
@@ -37,7 +44,8 @@ export type Answers = {
   ridingDays?: number
   // Phase 2
   style?: RidingStyle
-  terrainMix?: string   // categorical selection from terrain_mix question
+  terrainMix?: TerrainMix  // categorical from terrain_mix question (Phase 2)
+  // terrain is reserved for a future percentage-breakdown UI (Phase 3+)
   terrain?: {
     park: number
     groomed: number
