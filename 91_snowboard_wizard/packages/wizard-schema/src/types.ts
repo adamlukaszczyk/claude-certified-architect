@@ -16,7 +16,7 @@ type BaseQuestion = {
 }
 
 export type OptionQuestion = BaseQuestion & {
-  inputType?: 'single' | 'multi'
+  inputType?: 'single' | 'multi'  // loader normalises absent → 'single'
   options: Option[]
 }
 
@@ -30,7 +30,8 @@ export type NumericQuestion = BaseQuestion & {
 
 export type Question = OptionQuestion | NumericQuestion
 
-export type QuestionInputType = 'single' | 'multi' | 'numeric'
+// Derived from the union so it can't drift from the actual discriminant values
+export type QuestionInputType = NonNullable<Question['inputType']>
 
 export type ScoreRange = [number, number]
 
