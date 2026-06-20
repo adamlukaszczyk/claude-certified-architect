@@ -10,7 +10,8 @@ services:
       - DATABASE_URL=postgresql://wizard:wizard@postgres:5432/wizard
       - REDIS_URL=redis://redis:6379
     env_file:
-      - .env.local
+      - path: .env.local
+        required: false
     depends_on:
       postgres:
         condition: service_healthy
