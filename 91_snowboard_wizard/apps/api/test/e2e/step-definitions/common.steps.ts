@@ -194,13 +194,8 @@ Then('no auth cookies are set', function(this: ApiWorld) {
 
 // ── Value capture ─────────────────────────────────────────────────────────────
 
+// "And I capture..." inherits the previous keyword (Given/When/Then), so one registration covers all forms.
 Then('I capture the {string} from the response as {string}', function(this: ApiWorld, _field: string, _alias: string) {
-  return 'pending'
-})
-
-// Note: "And I capture..." is also parsed as "Then I capture..." by Cucumber
-
-When('I capture the {string} from the response as {string}', function(this: ApiWorld, _field: string, _alias: string) {
   return 'pending'
 })
 
