@@ -21,5 +21,6 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity'
       }),
     }),
   ],
+  exports: [TypeOrmModule],
 })
 export class DbModule {}

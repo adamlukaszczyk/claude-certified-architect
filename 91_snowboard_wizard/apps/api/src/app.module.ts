@@ -11,7 +11,7 @@ import { NarrativeModule } from './narrative/narrative.module'
 import { RecommendationsModule } from './recommendations/recommendations.module'
 import { AuthModule } from './auth/auth.module'
 import { WizardSessionsModule } from './wizard-sessions/wizard-sessions.module'
-import { HealthController } from './health/health.controller'
+import { HealthModule } from './health/health.module'
 import { CsrfGuard } from './auth/csrf.guard'
 
 @Module({
@@ -25,8 +25,8 @@ import { CsrfGuard } from './auth/csrf.guard'
     RecommendationsModule,
     AuthModule,
     WizardSessionsModule,
+    HealthModule,
   ],
-  controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: CsrfGuard }],
 })
 export class AppModule {}

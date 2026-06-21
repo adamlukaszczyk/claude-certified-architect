@@ -44,7 +44,13 @@ podman compose up --build api
 podman compose up -d --force-recreate consul-server
 ```
 
-**Live reload:** `apps/api/src` is bind-mounted read-only into the API container. NestJS `nest start --watch` recompiles on every host file save — no manual container restart needed.
+**Live reload caveat (macOS + Podman):** `apps/api/src` is bind-mounted into the API container and `nest start --watch` runs inside it, but Podman's macOS VM does **not** forward inotify events from the host. The watcher never fires on file saves. After editing source files, restart the container process to trigger a fresh compilation:
+
+```bash
+podman restart 91_snowboard_wizard_api_1
+```
+
+`podman compose restart api` does the same thing but may be slower. `podman compose up -d api` recreates the container and also works, but picks up the pre-built dist from the image layer on first boot — use `podman restart` to guarantee a clean recompile from the bind-mounted source.
 
 **Dev image vs prod image:**
 - `infra/docker/Dockerfile.api.dev` — dev image (runs `nest start --watch`, all devDeps installed)
@@ -73,13 +79,40 @@ podman compose up -d --force-recreate consul-server
 
 ## Environment variables
 
-Postgres credentials are parameterized — set them in `.env` (loaded automatically by compose if present):
+Copy `.env.example` to `.env` and fill in real values. Compose loads `.env` automatically for both variable substitution in the compose files and injection into the `api` container.
 
-```bash
-POSTGRES_USER=wizard       # default: wizard
-POSTGRES_PASSWORD=wizard   # default: wizard
-POSTGRES_DB=wizard         # default: wizard
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `POSTGRES_USER` | no | default `wizard` |
+| `POSTGRES_PASSWORD` | no | default `wizard` |
+| `POSTGRES_DB` | no | default `wizard` |
+| `DATABASE_URL` | no | derived from the three above by default |
+| `REDIS_URL` | no | default `redis://localhost:6379` |
+| `JWT_SECRET` | yes | min 32 chars |
+| `ANTHROPIC_API_KEY` | yes | checked by `GET /api/health` |
+| `GOOGLE_CLIENT_ID` | yes | checked by `GET /api/health` |
+| `ALLOWED_ORIGINS` | no | comma-separated, default `http://localhost:3000` |
+
+## API health check
+
+`GET /api/health` reports connectivity for all four runtime dependencies:
+
+```json
+{
+  "status": "ok",
+  "checks": {
+    "postgresql": { "status": "ok" },
+    "redis":      { "status": "ok" },
+    "anthropic":  { "status": "ok" },
+    "google":     { "status": "ok" }
+  }
+}
 ```
+
+- Returns **200** when PostgreSQL and Redis are reachable (Consul uses this as the liveness gate).
+- Returns **503** when either core dependency is down.
+- `anthropic`: validates `ANTHROPIC_API_KEY` against `GET /v1/models`.
+- `google`: validates `GOOGLE_CLIENT_ID` via a dummy token exchange — `invalid_grant` means the client ID is registered; `invalid_client` means it isn't.
 
 ## Implementation plans
 
