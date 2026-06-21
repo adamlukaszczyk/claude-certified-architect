@@ -48,6 +48,7 @@ describe('AuthService', () => {
   it('loginWithGoogle() verifies token and returns access JWT', async () => {
     const result = await service.loginWithGoogle('valid-google-id-token')
     expect(result.accessToken).toBe('mock-jwt-token')
+    expect(result.refreshToken).toBeDefined()
     expect(result.user.email).toBe('test@test.com')
     expect(mockUsersService.upsertFromGoogle).toHaveBeenCalledWith('g-1', 'test@test.com', 'Test', null)
   })
