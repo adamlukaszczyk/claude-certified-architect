@@ -3,7 +3,6 @@ import { Controller, Post, Get, Body, Res, UseGuards, Req, HttpCode, HttpStatus,
 import type { Response, Request, CookieOptions } from 'express'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt-auth.guard'
-import { CsrfGuard } from './csrf.guard'
 import { GoogleAuthDto } from './dto/google-auth.dto'
 import { IsString, IsOptional } from 'class-validator'
 import type { UserEntity } from '../entities/user.entity'
