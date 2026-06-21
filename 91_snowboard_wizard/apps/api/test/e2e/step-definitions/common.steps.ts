@@ -55,7 +55,7 @@ When(/^I send GET \/api\/sessions\/(.+)$/, async function(this: ApiWorld, _id: s
   return 'pending'
 })
 
-When(/^I send GET \/api\/recommendations\/(.+)\/pdf$/, async function(this: ApiWorld, _id: string) {
+When(/^I send GET \/api\/recommendations\/([^/]+)\/pdf$/, async function(this: ApiWorld, _id: string) {
   return 'pending'
 })
 
@@ -63,11 +63,11 @@ When(/^I send GET \/api\/recommendations\/share\/(.+) without auth credentials$/
   return 'pending'
 })
 
-When(/^I send GET \/api\/recommendations\/(.+) without auth credentials$/, async function(this: ApiWorld, _id: string) {
+When(/^I send GET \/api\/recommendations\/([^/]+) without auth credentials$/, async function(this: ApiWorld, _id: string) {
   return 'pending'
 })
 
-When(/^I send GET \/api\/recommendations\/(.+) with my access token$/, async function(this: ApiWorld, _id: string) {
+When(/^I send GET \/api\/recommendations\/([^/]+) with my access token$/, async function(this: ApiWorld, _id: string) {
   return 'pending'
 })
 
