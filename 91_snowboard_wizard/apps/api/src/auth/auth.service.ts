@@ -51,8 +51,6 @@ export class AuthService {
     )
 
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
-    // TODO: wire refresh token into a separate httpOnly cookie once POST /auth/refresh is added
-    await this.issueRefreshToken(user.id)
 
     return { accessToken, user }
   }
