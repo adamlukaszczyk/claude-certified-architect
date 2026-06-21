@@ -1,4 +1,6 @@
 // recommendations.steps.ts - Steps specific to recommendations features
+import request from 'supertest'
+import assert from 'node:assert'
 import { Given, Then } from '@cucumber/cucumber'
 import type { ApiWorld } from '../support/world'
 
@@ -14,9 +16,15 @@ Given('a recommendation exists in the database with id {string} belonging to {st
 
 Given('a recommendation exists in the database with shareToken {string}', async function(
   this: ApiWorld,
-  _shareToken: string,
+  tokenAlias: string,
 ) {
-  return 'pending'
+  const res = await request(this.baseUrl)
+    .post('/api/recommendations')
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send({ answers: { experience: 'intermediate', style: 'all-mountain', weightCategory: 'w_71_85' } })
+  assert.strictEqual(res.status, 201, `setup: failed to create recommendation: ${JSON.stringify(res.body)}`)
+  this.capturedValues[tokenAlias] = res.body.shareToken
 })
 
 // ── Assertion steps ───────────────────────────────────────────────────────────
