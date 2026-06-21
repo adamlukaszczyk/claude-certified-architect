@@ -1,13 +1,9 @@
-// auth.service.ts - Google ID token verification, JWT issuance, refresh token storage
+// auth.service.ts - Google ID token verification and JWT issuance
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { OAuth2Client } from 'google-auth-library'
-import { createHash, randomBytes } from 'crypto'
 import { UsersService } from '../users/users.service'
-import { RefreshTokenEntity } from '../entities/refresh-token.entity'
 import type { UserEntity } from '../entities/user.entity'
 
 type LoginResult = {
@@ -23,8 +19,6 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
-    @InjectRepository(RefreshTokenEntity)
-    private readonly refreshTokenRepo: Repository<RefreshTokenEntity>,
   ) {
     this.googleClient = new OAuth2Client(config.get<string>('google.clientId'))
   }
@@ -53,13 +47,5 @@ export class AuthService {
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
 
     return { accessToken, user }
-  }
-
-  private async issueRefreshToken(userId: string): Promise<void> {
-    const token = randomBytes(32).toString('base64url')
-    const tokenHash = createHash('sha256').update(token).digest('hex')
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-
-    await this.refreshTokenRepo.save({ userId, tokenHash, expiresAt })
   }
 }
