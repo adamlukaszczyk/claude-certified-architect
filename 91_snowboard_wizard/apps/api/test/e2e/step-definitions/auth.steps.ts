@@ -20,10 +20,6 @@ Given('a user with Google ID {string} already exists', async function(this: ApiW
   return 'pending'
 })
 
-Given("that user's name is {string}", async function(this: ApiWorld, _name: string) {
-  return 'pending'
-})
-
 // ── Cookie / token state ──────────────────────────────────────────────────────
 
 Given('my {string} cookie is valid and not expired', function(this: ApiWorld, _cookieName: string) {
