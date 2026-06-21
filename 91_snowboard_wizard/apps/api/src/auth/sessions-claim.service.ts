@@ -21,7 +21,7 @@ export class SessionsClaimService {
       // Delete old guest session (rotates the session identifier — prevents session fixation)
       await this.sessionRepo.delete(oldId)
       // Re-insert with new auto-generated UUID and the authenticated userId
-      await this.sessionRepo.save({
+      const newSession: Partial<WizardSessionEntity> = {
         userId,
         name: session.name,
         answers: session.answers,
@@ -29,7 +29,8 @@ export class SessionsClaimService {
         schemaVersion: session.schemaVersion,
         phaseReached: session.phaseReached,
         completedAt: session.completedAt,
-      } as Partial<WizardSessionEntity>)
+      }
+      await this.sessionRepo.save(newSession)
     }
   }
 }

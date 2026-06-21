@@ -69,7 +69,7 @@ export class AuthService {
       where: { tokenHash, expiresAt: MoreThan(new Date()) },
       relations: ['user'],
     })
-    if (!stored) throw new UnauthorizedException('Refresh token invalid or expired')
+    if (!stored || !stored.user) throw new UnauthorizedException('Refresh token invalid or expired')
 
     const accessToken = this.jwtService.sign({ sub: stored.user.id, email: stored.user.email })
     return { accessToken }
