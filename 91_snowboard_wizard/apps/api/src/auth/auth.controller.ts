@@ -1,6 +1,6 @@
 // auth.controller.ts - Auth endpoints
 import { Controller, Post, Get, Body, Res, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common'
-import type { Response, Request } from 'express'
+import type { Response, Request, CookieOptions } from 'express'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { CsrfGuard } from './csrf.guard'
@@ -9,6 +9,13 @@ import type { UserEntity } from '../entities/user.entity'
 
 interface RequestWithUser extends Request {
   user: UserEntity
+}
+
+const ACCESS_TOKEN_COOKIE: CookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
 }
 
 @Controller('auth')
@@ -20,14 +27,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async googleLogin(@Body() dto: GoogleAuthDto, @Res({ passthrough: true }) res: Response) {
     const { accessToken, user } = await this.authService.loginWithGoogle(dto.idToken)
-    const isProduction = process.env.NODE_ENV === 'production'
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: isProduction,
-      maxAge: 15 * 60 * 1000, // 15 minutes
-      path: '/',
-    })
+    res.cookie('access_token', accessToken, { ...ACCESS_TOKEN_COOKIE, maxAge: 15 * 60 * 1000 })
     return { userId: user.id, email: user.email }
   }
 
@@ -40,7 +40,7 @@ export class AuthController {
 
   @Get('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token', { path: '/' })
+    res.clearCookie('access_token', ACCESS_TOKEN_COOKIE)
     return { ok: true }
   }
 }

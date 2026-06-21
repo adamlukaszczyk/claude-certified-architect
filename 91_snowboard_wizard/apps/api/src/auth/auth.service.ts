@@ -51,17 +51,17 @@ export class AuthService {
     )
 
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
+    // TODO: wire refresh token into a separate httpOnly cookie once POST /auth/refresh is added
     await this.issueRefreshToken(user.id)
 
     return { accessToken, user }
   }
 
-  private async issueRefreshToken(userId: string): Promise<string> {
+  private async issueRefreshToken(userId: string): Promise<void> {
     const token = randomBytes(32).toString('base64url')
     const tokenHash = createHash('sha256').update(token).digest('hex')
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
     await this.refreshTokenRepo.save({ userId, tokenHash, expiresAt })
-    return token
   }
 }
