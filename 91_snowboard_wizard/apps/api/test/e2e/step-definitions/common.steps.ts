@@ -1,5 +1,6 @@
 // common.steps.ts - Shared step definitions: HTTP calls, assertions, cookie helpers
 import request from 'supertest'
+import assert from 'node:assert'
 import { Given, When, Then, DataTable } from '@cucumber/cucumber'
 import type { ApiWorld } from '../support/world'
 
@@ -143,16 +144,27 @@ When(/^I send PUT \/api\/sessions\/(.+) with JSON body:$/, async function(this: 
 
 // ── Response assertions ───────────────────────────────────────────────────────
 
-Then('the response status is {int}', function(this: ApiWorld, _expectedStatus: number) {
-  return 'pending'
+Then('the response status is {int}', function(this: ApiWorld, expectedStatus: number) {
+  assert.strictEqual(
+    this.response!.status,
+    expectedStatus,
+    `expected status ${expectedStatus} but got ${this.response!.status}: ${JSON.stringify(this.response!.body)}`,
+  )
 })
 
-Then('the response body field {string} is {string}', function(this: ApiWorld, _field: string, _value: string) {
-  return 'pending'
+Then('the response body field {string} is {string}', function(this: ApiWorld, field: string, rawExpected: string) {
+  const actual = this.getField(this.response!.body, field)
+  const expected = this.capturedValues[rawExpected] ?? rawExpected
+  assert.strictEqual(
+    String(actual),
+    expected,
+    `expected field "${field}" to equal "${expected}" but got "${actual}"`,
+  )
 })
 
-Then('the response body field {string} is the number {int}', function(this: ApiWorld, _field: string, _value: number) {
-  return 'pending'
+Then('the response body field {string} is the number {int}', function(this: ApiWorld, field: string, expected: number) {
+  const actual = this.getField(this.response!.body, field)
+  assert.strictEqual(actual, expected, `expected field "${field}" to be ${expected} but got ${actual}`)
 })
 
 Then('the response body field {string} is greater than {int}', function(this: ApiWorld, _field: string, _threshold: number) {
@@ -163,33 +175,63 @@ Then('the response body field {string} is less than {int}', function(this: ApiWo
   return 'pending'
 })
 
-Then('the response body field {string} is a non-empty string', function(this: ApiWorld, _field: string) {
-  return 'pending'
+Then('the response body field {string} is a non-empty string', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    typeof actual === 'string' && actual.length > 0,
+    `expected field "${field}" to be a non-empty string but got ${JSON.stringify(actual)}`,
+  )
 })
 
-Then('the response body field {string} is a non-empty UUID', function(this: ApiWorld, _field: string) {
-  return 'pending'
+Then('the response body field {string} is a non-empty UUID', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  assert.ok(
+    typeof actual === 'string' && uuidRegex.test(actual),
+    `expected field "${field}" to be a UUID but got ${JSON.stringify(actual)}`,
+  )
 })
 
-Then('the response body field {string} is a number', function(this: ApiWorld, _field: string) {
-  return 'pending'
+Then('the response body field {string} is a number', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    typeof actual === 'number',
+    `expected field "${field}" to be a number but got ${typeof actual} (${actual})`,
+  )
 })
 
-Then('the response body field {string} is a number between {int} and {int}', function(this: ApiWorld, _field: string, _min: number, _max: number) {
-  return 'pending'
+Then('the response body field {string} is a number between {int} and {int}', function(this: ApiWorld, field: string, min: number, max: number) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    typeof actual === 'number' && actual >= min && actual <= max,
+    `expected field "${field}" to be a number between ${min} and ${max} but got ${actual}`,
+  )
 })
 
-Then('the response body field {string} is an object', function(this: ApiWorld, _field: string) {
-  return 'pending'
+Then('the response body field {string} is an object', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    actual !== null && typeof actual === 'object' && !Array.isArray(actual),
+    `expected field "${field}" to be a plain object but got ${JSON.stringify(actual)}`,
+  )
 })
 
-Then('the response body field {string} matches the pattern {string}', function(this: ApiWorld, _field: string, _pattern: string) {
-  return 'pending'
+Then('the response body field {string} matches the pattern {string}', function(this: ApiWorld, field: string, pattern: string) {
+  const actual = this.getField(this.response!.body, field)
+  const regex = new RegExp(pattern)
+  assert.ok(
+    regex.test(String(actual)),
+    `expected field "${field}" (${actual}) to match pattern /${pattern}/`,
+  )
 })
 
-Then('the response body field {string} is one of {string}', function(this: ApiWorld, _field: string, _csv: string) {
-  // csv is comma-separated: "twin,directional-twin,directional"
-  return 'pending'
+Then('the response body field {string} is one of {string}', function(this: ApiWorld, field: string, csv: string) {
+  const actual = this.getField(this.response!.body, field)
+  const options = csv.split(',')
+  assert.ok(
+    options.includes(String(actual)),
+    `expected field "${field}" to be one of [${csv}] but got "${actual}"`,
+  )
 })
 
 Then('the response body does not contain the field {string}', function(this: ApiWorld, _field: string) {
@@ -221,8 +263,13 @@ Then('no auth cookies are set', function(this: ApiWorld) {
 // ── Value capture ─────────────────────────────────────────────────────────────
 
 // "And I capture..." inherits the previous keyword (Given/When/Then), so one registration covers all forms.
-Then('I capture the {string} from the response as {string}', function(this: ApiWorld, _field: string, _alias: string) {
-  return 'pending'
+Then('I capture the {string} from the response as {string}', function(this: ApiWorld, field: string, alias: string) {
+  const value = this.getField(this.response!.body, field)
+  assert.ok(
+    value !== undefined && value !== null,
+    `cannot capture "${field}" — field is absent from response body`,
+  )
+  this.capturedValues[alias] = String(value)
 })
 
 Then('the captured values {string} and {string} are different', function(this: ApiWorld, _a: string, _b: string) {
