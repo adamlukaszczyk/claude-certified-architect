@@ -114,6 +114,46 @@ Copy `.env.example` to `.env` and fill in real values. Compose loads `.env` auto
 - `anthropic`: validates `ANTHROPIC_API_KEY` against `GET /v1/models`.
 - `google`: validates `GOOGLE_CLIENT_ID` via a dummy token exchange — `invalid_grant` means the client ID is registered; `invalid_client` means it isn't.
 
+## Testing
+
+### Unit tests (Jest)
+
+```bash
+pnpm --filter @snowboard/api test
+```
+
+42 specs under `apps/api/src/**/*.spec.ts`.
+
+### E2E tests (Cucumber.js 11 + Supertest)
+
+```bash
+pnpm --filter @snowboard/api test:e2e           # all non-@wip scenarios
+pnpm --filter @snowboard/api test:e2e:smoke     # @smoke and not @wip
+```
+
+Config: `apps/api/cucumber.js` (CommonJS, `ts-node/register`, two profiles: `default` / `smoke`).
+
+Layout:
+```
+apps/api/test/e2e/
+  features/           14 .feature files, 61 Gherkin scenarios
+    auth/             google-login, token-refresh, logout, me
+    journeys/         guest-wizard-completion, authenticated-wizard-save-reload, session-claim-on-login
+    recommendations/  create, retrieve, share, pdf
+    health.feature    scoring.feature  sessions.feature
+  step-definitions/   common, health, auth, scoring, sessions, recommendations
+  support/            world.ts (ApiWorld), hooks.ts, fixtures.ts
+```
+
+**ApiWorld** (`test/e2e/support/world.ts`): custom Cucumber World holding `response`, `cookies`, `capturedValues`, `skipCsrfOrigin`. Reads `API_URL` (default `http://localhost:3001`) and `API_ORIGIN` (default `http://localhost:3000`).
+
+All step bodies currently return `'pending'` — the framework is scaffolded; HTTP calls are not yet implemented.
+
+**Tag strategy:** `@smoke` (happy-path gates), `@regression` (full suite), `@auth`, `@security`, `@journey`, `@wip` (excluded from default run).
+
 ## Implementation plans
 
-See `docs/superpowers/plans/2026-06-20-snowboard-wizard-plan-*.md` for the phased build plans.
+See `docs/superpowers/plans/` in the repo root for the phased build plans and the Cucumber e2e plan:
+- `2026-06-20-snowboard-wizard-plan-1-monorepo-schema.md`
+- `2026-06-20-snowboard-wizard-plan-2-api.md`
+- `2026-06-20-snowboard-wizard-cucumber-e2e.md`
