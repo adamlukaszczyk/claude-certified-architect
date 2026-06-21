@@ -1,4 +1,5 @@
 // common.steps.ts - Shared step definitions: HTTP calls, assertions, cookie helpers
+import request from 'supertest'
 import { Given, When, Then, DataTable } from '@cucumber/cucumber'
 import type { ApiWorld } from '../support/world'
 
@@ -36,7 +37,8 @@ When('I send GET {string} with a tampered JWT in the Authorization header', asyn
 
 // Intercept bare path steps used in feature files (e.g. "I send GET /api/health")
 When(/^I send GET \/api\/health$/, async function(this: ApiWorld) {
-  return 'pending'
+  const res = await request(this.baseUrl).get('/api/health')
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
 When(/^I send GET \/api\/auth\/me with my access token$/, async function(this: ApiWorld) {
@@ -51,20 +53,28 @@ When(/^I send GET \/api\/auth\/me with a tampered JWT in the Authorization heade
   return 'pending'
 })
 
-When(/^I send GET \/api\/sessions\/(.+)$/, async function(this: ApiWorld, _id: string) {
-  return 'pending'
+When(/^I send GET \/api\/sessions\/(.+)$/, async function(this: ApiWorld, id: string) {
+  const resolvedId = this.resolve(id)
+  const res = await request(this.baseUrl).get(`/api/sessions/${resolvedId}`)
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
 When(/^I send GET \/api\/recommendations\/([^/]+)\/pdf$/, async function(this: ApiWorld, _id: string) {
   return 'pending'
 })
 
-When(/^I send GET \/api\/recommendations\/share\/(.+) without auth credentials$/, async function(this: ApiWorld, _token: string) {
-  return 'pending'
+When(/^I send GET \/api\/recommendations\/share\/(.+) without auth credentials$/, async function(this: ApiWorld, token: string) {
+  // capturedValues lookup handles bare-string aliases (share.feature Background)
+  // this.resolve() handles <placeholder> syntax (journey feature)
+  const resolvedToken = this.capturedValues[token] ?? this.resolve(token)
+  const res = await request(this.baseUrl).get(`/api/recommendations/share/${resolvedToken}`)
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
-When(/^I send GET \/api\/recommendations\/([^/]+) without auth credentials$/, async function(this: ApiWorld, _id: string) {
-  return 'pending'
+When(/^I send GET \/api\/recommendations\/([^/]+) without auth credentials$/, async function(this: ApiWorld, id: string) {
+  const resolvedId = this.resolve(id)
+  const res = await request(this.baseUrl).get(`/api/recommendations/${resolvedId}`)
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
 When(/^I send GET \/api\/recommendations\/([^/]+) with my access token$/, async function(this: ApiWorld, _id: string) {
@@ -93,16 +103,26 @@ When(/^I send POST \/api\/auth\/logout$/, async function(this: ApiWorld) {
   return 'pending'
 })
 
-When(/^I send POST \/api\/score with JSON body:$/, async function(this: ApiWorld, _body: string) {
-  return 'pending'
+When(/^I send POST \/api\/score with JSON body:$/, async function(this: ApiWorld, body: string) {
+  const res = await request(this.baseUrl)
+    .post('/api/score')
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send(JSON.parse(body))
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
 When(/^I send POST \/api\/score with an empty body$/, async function(this: ApiWorld) {
   return 'pending'
 })
 
-When(/^I send POST \/api\/recommendations with JSON body:$/, async function(this: ApiWorld, _body: string) {
-  return 'pending'
+When(/^I send POST \/api\/recommendations with JSON body:$/, async function(this: ApiWorld, body: string) {
+  const res = await request(this.baseUrl)
+    .post('/api/recommendations')
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send(JSON.parse(body))
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
 When(/^I send POST \/api\/recommendations with my access token and JSON body:$/, async function(this: ApiWorld, _body: string) {
@@ -111,8 +131,14 @@ When(/^I send POST \/api\/recommendations with my access token and JSON body:$/,
 
 // ── PUT requests ──────────────────────────────────────────────────────────────
 
-When(/^I send PUT \/api\/sessions\/(.+) with JSON body:$/, async function(this: ApiWorld, _id: string, _body: string) {
-  return 'pending'
+When(/^I send PUT \/api\/sessions\/(.+) with JSON body:$/, async function(this: ApiWorld, id: string, body: string) {
+  const resolvedId = this.resolve(id)
+  const res = await request(this.baseUrl)
+    .put(`/api/sessions/${resolvedId}`)
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send(JSON.parse(body))
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
 })
 
 // ── Response assertions ───────────────────────────────────────────────────────
