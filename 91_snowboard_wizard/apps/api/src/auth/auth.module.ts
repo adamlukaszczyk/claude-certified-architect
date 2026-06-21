@@ -7,8 +7,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import { JwtStrategy } from './jwt.strategy'
+import { SessionsClaimService } from './sessions-claim.service'
 import { UsersModule } from '../users/users.module'
 import { RefreshTokenEntity } from '../entities/refresh-token.entity'
+import { WizardSessionEntity } from '../entities/wizard-session.entity'
 
 @Module({
   imports: [
@@ -21,10 +23,10 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity'
         signOptions: { expiresIn: config.get<string>('jwt.expiresIn') ?? '15m' },
       }),
     }),
-    TypeOrmModule.forFeature([RefreshTokenEntity]),
+    TypeOrmModule.forFeature([RefreshTokenEntity, WizardSessionEntity]),
     UsersModule,
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, SessionsClaimService],
   controllers: [AuthController],
   exports: [AuthService, JwtModule],
 })

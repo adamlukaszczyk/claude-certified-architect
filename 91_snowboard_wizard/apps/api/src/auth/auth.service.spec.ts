@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { createHash } from 'crypto'
 import { AuthService } from './auth.service'
+import { SessionsClaimService } from './sessions-claim.service'
 import { UsersService } from '../users/users.service'
 import { RefreshTokenEntity } from '../entities/refresh-token.entity'
 
@@ -12,6 +13,7 @@ const mockUsersService = { upsertFromGoogle: jest.fn().mockResolvedValue(mockUse
 const mockJwtService = { sign: jest.fn().mockReturnValue('mock-jwt-token') }
 const mockConfigService = { get: jest.fn().mockReturnValue('google-client-id') }
 const mockRefreshTokenRepo = { save: jest.fn().mockResolvedValue({}) }
+const mockSessionsClaimService = { claimGuestSessions: jest.fn().mockResolvedValue(undefined) }
 
 jest.mock('google-auth-library', () => ({
   OAuth2Client: jest.fn().mockImplementation(() => ({
@@ -37,6 +39,7 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: getRepositoryToken(RefreshTokenEntity), useValue: mockRefreshTokenRepo },
+        { provide: SessionsClaimService, useValue: mockSessionsClaimService },
       ],
     }).compile()
     service = module.get(AuthService)
@@ -61,6 +64,7 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: getRepositoryToken(RefreshTokenEntity), useValue: mockRefreshTokenRepo },
+        { provide: SessionsClaimService, useValue: mockSessionsClaimService },
       ],
     }).compile()
     const svc = moduleNew.get(AuthService)

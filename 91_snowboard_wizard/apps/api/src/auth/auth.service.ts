@@ -1,17 +1,19 @@
-// auth.service.ts - Google ID token verification and JWT issuance
+// auth.service.ts - Google login, JWT issuance, refresh/logout, guest session claim
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { createHash, randomBytes } from 'crypto'
+import { Repository, MoreThan } from 'typeorm'
 import { OAuth2Client } from 'google-auth-library'
+import { createHash, randomBytes } from 'crypto'
 import { UsersService } from '../users/users.service'
-import type { UserEntity } from '../entities/user.entity'
+import { SessionsClaimService } from './sessions-claim.service'
 import { RefreshTokenEntity } from '../entities/refresh-token.entity'
+import type { UserEntity } from '../entities/user.entity'
 
 type LoginResult = {
   accessToken: string
+  refreshToken: string
   user: UserEntity
 }
 
@@ -23,12 +25,14 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
-    @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepo: Repository<RefreshTokenEntity>,
+    private readonly sessionsClaim: SessionsClaimService,
+    @InjectRepository(RefreshTokenEntity)
+    private readonly refreshTokenRepo: Repository<RefreshTokenEntity>,
   ) {
     this.googleClient = new OAuth2Client(config.get<string>('google.clientId'))
   }
 
-  async loginWithGoogle(idToken: string): Promise<LoginResult> {
+  async loginWithGoogle(idToken: string, guestSessionId?: string): Promise<LoginResult> {
     let payload: { sub: string; email?: string; name?: string; picture?: string }
     try {
       const ticket = await this.googleClient.verifyIdToken({
@@ -49,9 +53,31 @@ export class AuthService {
       payload.picture ?? null,
     )
 
-    const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
+    if (guestSessionId) {
+      await this.sessionsClaim.claimGuestSessions(guestSessionId, user.id)
+    }
 
-    return { accessToken, user }
+    const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
+    const refreshToken = await this.issueRefreshToken(user.id)
+
+    return { accessToken, refreshToken, user }
+  }
+
+  async refreshAccessToken(rawRefreshToken: string): Promise<{ accessToken: string }> {
+    const tokenHash = createHash('sha256').update(rawRefreshToken).digest('hex')
+    const stored = await this.refreshTokenRepo.findOne({
+      where: { tokenHash, expiresAt: MoreThan(new Date()) },
+      relations: ['user'],
+    })
+    if (!stored) throw new UnauthorizedException('Refresh token invalid or expired')
+
+    const accessToken = this.jwtService.sign({ sub: stored.user.id, email: stored.user.email })
+    return { accessToken }
+  }
+
+  async logout(rawRefreshToken: string): Promise<void> {
+    const tokenHash = createHash('sha256').update(rawRefreshToken).digest('hex')
+    await this.refreshTokenRepo.delete({ tokenHash })
   }
 
   async issueRefreshToken(userId: string): Promise<string> {
