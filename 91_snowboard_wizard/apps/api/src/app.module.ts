@@ -6,6 +6,7 @@ import { DbModule } from './db/db.module'
 import { ScoringModule } from './scoring/scoring.module'
 import { NarrativeModule } from './narrative/narrative.module'
 import { RecommendationsModule } from './recommendations/recommendations.module'
+import { AuthModule } from './auth/auth.module'
 import { HealthController } from './health/health.controller'
 
 @Module({
@@ -15,6 +16,7 @@ import { HealthController } from './health/health.controller'
     ScoringModule,
     NarrativeModule,
     RecommendationsModule,
+    AuthModule,
   ],
   controllers: [HealthController],
 })
