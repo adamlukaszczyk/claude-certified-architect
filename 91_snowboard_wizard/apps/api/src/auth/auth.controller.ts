@@ -39,7 +39,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('google')
-  @UseGuards(CsrfGuard)
   @HttpCode(HttpStatus.OK)
   async googleLogin(@Body() dto: GoogleLoginDto, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken, user } = await this.authService.loginWithGoogle(dto.idToken, dto.guestSessionId)
@@ -49,7 +48,6 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(CsrfGuard)
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawToken = req.cookies?.['refresh_token']
@@ -62,7 +60,6 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(CsrfGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawToken = req.cookies?.['refresh_token']
