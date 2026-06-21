@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class CreateWizardSessions1000000002 implements MigrationInterface {
-  name = 'CreateWizardSessions1000000002'
+export class CreateWizardSessions1000000002000 implements MigrationInterface {
+  name = 'CreateWizardSessions1000000002000'
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

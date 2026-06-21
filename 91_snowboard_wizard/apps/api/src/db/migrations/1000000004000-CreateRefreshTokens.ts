@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class CreateRefreshTokens1000000004 implements MigrationInterface {
-  name = 'CreateRefreshTokens1000000004'
+export class CreateRefreshTokens1000000004000 implements MigrationInterface {
+  name = 'CreateRefreshTokens1000000004000'
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
