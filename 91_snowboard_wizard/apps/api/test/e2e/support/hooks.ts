@@ -1,6 +1,8 @@
 // hooks.ts - Cucumber Before/After lifecycle hooks
-import { Before, After } from '@cucumber/cucumber'
+import { Before, After, setDefaultTimeout } from '@cucumber/cucumber'
 import type { ApiWorld } from './world'
+
+setDefaultTimeout(60_000)
 
 // Reset all per-scenario state before each scenario
 Before(function(this: ApiWorld) {

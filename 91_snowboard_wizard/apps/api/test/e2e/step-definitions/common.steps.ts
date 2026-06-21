@@ -4,12 +4,12 @@ import type { ApiWorld } from '../support/world'
 
 // ── Setup / Context ──────────────────────────────────────────────────────────
 
-Given('the API is running', async function(this: ApiWorld) {
-  return 'pending'
+Given('the API is running', function(this: ApiWorld) {
+  // no-op: assumes a live stack is running at this.baseUrl
 })
 
 Given('I have no auth credentials', function(this: ApiWorld) {
-  return 'pending'
+  // no-op: cookie jar is empty by default (reset in Before hook)
 })
 
 Given('the next request will have no Origin or Referer header', function(this: ApiWorld) {

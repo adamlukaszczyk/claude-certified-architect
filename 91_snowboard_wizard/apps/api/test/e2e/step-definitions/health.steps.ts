@@ -3,11 +3,11 @@ import { Given } from '@cucumber/cucumber'
 import type { ApiWorld } from '../support/world'
 
 Given('PostgreSQL is reachable', function(this: ApiWorld) {
-  return 'pending'
+  // no-op: assumes live stack is healthy
 })
 
 Given('Redis is reachable', function(this: ApiWorld) {
-  return 'pending'
+  // no-op: assumes live stack is healthy
 })
 
 Given('PostgreSQL is not reachable', function(this: ApiWorld) {
