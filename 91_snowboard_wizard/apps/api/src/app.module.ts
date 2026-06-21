@@ -2,6 +2,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
+import { PrometheusModule } from '@willsoto/nestjs-prometheus'
 import configuration from './config/configuration'
 import { DbModule } from './db/db.module'
 import { CacheModule } from './cache/cache.module'
@@ -16,6 +17,7 @@ import { CsrfGuard } from './auth/csrf.guard'
 @Module({
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
+    PrometheusModule.register({ path: '/metrics', defaultMetrics: { enabled: true } }),
     DbModule,
     CacheModule,
     ScoringModule,

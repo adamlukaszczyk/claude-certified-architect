@@ -16,7 +16,7 @@ async function bootstrap(): Promise<void> {
     origin: allowedOrigins,
     credentials: true,
   })
-  app.setGlobalPrefix('api')
+  app.setGlobalPrefix('api', { exclude: ['/metrics'] })
   const port = process.env.PORT ?? 3001
   await app.listen(port)
 }

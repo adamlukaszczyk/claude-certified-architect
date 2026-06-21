@@ -1,0 +1,55 @@
+# docker-compose.override.yml — development overrides (auto-loaded by docker compose up)
+#
+# Adds live reload for the API:
+# - Uses Dockerfile.api.dev (runs nest start --watch instead of prebuilt dist)
+# - Mounts apps/api/src as a read-only volume so host edits are instantly visible
+#   inside the container; NestJS watcher recompiles on each change
+# - Also wires develop.watch for `docker compose watch` if preferred
+#
+# Consul service discovery:
+# - Mounts infra/consul/services.json into Consul's config dir
+# - Consul loads all .json files from /consul/config at startup
+#
+# Run: docker compose up
+# (podman: podman compose up)
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api.dev
+    volumes:
+      - ./apps/api/src:/app/apps/api/src:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production-minimum-32-chars}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/api/src
+          target: /app/apps/api/src
+
+  consul-server:
+    volumes:
+      - ./infra/consul:/consul/config
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@wizard.dev
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+
+volumes:
+  pgadmin_data:
