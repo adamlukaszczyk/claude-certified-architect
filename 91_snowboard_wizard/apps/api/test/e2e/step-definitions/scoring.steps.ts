@@ -2,8 +2,6 @@
 // Most scoring steps use common When/Then patterns.
 // This file holds only scoring-specific Given steps and
 // the Scenario Outline parameter variants.
-import { Then } from '@cucumber/cucumber'
-import type { ApiWorld } from '../support/world'
 
 // The Scenario Outline uses "less than" / "greater than" as plain text
 // in the step — those are handled by common.steps.ts's numeric comparison
