@@ -6,7 +6,7 @@ Feature: Current user profile
   Background:
     Given the API is running
 
-  @smoke @auth
+  @auth
   Scenario: Authenticated user retrieves their profile
     Given I am logged in as "alice@example.com" with name "Alice"
     When I send GET /api/auth/me with my access token

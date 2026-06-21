@@ -11,7 +11,7 @@ Feature: Guest wizard completion end-to-end
     # Phase 1 — Rider Profile scoring
     When I send POST /api/score with JSON body:
       """
-      { "experience": "intermediate", "weightCategory": "w_71_85", "stance": "regular" }
+      { "answers": { "experience": "intermediate", "weightCategory": "w_71_85", "stance": "regular" } }
       """
     Then the response status is 200
     And the response body field "scores.flex" is a number
@@ -26,25 +26,14 @@ Feature: Guest wizard completion end-to-end
     # Phase 2 — Style scoring
     When I send POST /api/score with JSON body:
       """
-      {
-        "experience": "intermediate",
-        "weightCategory": "w_71_85",
-        "style": "all-mountain",
-        "terrainMix": "mixed"
-      }
+      { "answers": { "experience": "intermediate", "weightCategory": "w_71_85", "style": "all-mountain", "terrainMix": "mixed" } }
       """
     Then the response status is 200
 
     # Phase 3 — Deep Dive scoring
     When I send POST /api/score with JSON body:
       """
-      {
-        "experience": "intermediate",
-        "weightCategory": "w_71_85",
-        "style": "all-mountain",
-        "terrainMix": "mixed",
-        "speedPreference": "moderate"
-      }
+      { "answers": { "experience": "intermediate", "weightCategory": "w_71_85", "style": "all-mountain", "terrainMix": "mixed", "speedPreference": "moderate" } }
       """
     Then the response status is 200
 

@@ -7,7 +7,7 @@ Feature: Retrieve a recommendation by ID
     Given the API is running
     And a recommendation exists in the database with id "rec-uuid" belonging to "alice@example.com"
 
-  @smoke @auth
+  @auth
   Scenario: Owner retrieves their recommendation
     Given I am logged in as "alice@example.com"
     When I send GET /api/recommendations/rec-uuid with my access token

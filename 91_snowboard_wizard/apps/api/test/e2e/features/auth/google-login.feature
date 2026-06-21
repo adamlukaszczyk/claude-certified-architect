@@ -7,7 +7,7 @@ Feature: Google OAuth login
     Given the API is running
     And a valid Google ID token exists for "alice@example.com"
 
-  @smoke @auth
+  @auth
   Scenario: First-time login creates a new user account
     When I send POST /api/auth/google with body:
       | idToken | <valid-google-id-token> |

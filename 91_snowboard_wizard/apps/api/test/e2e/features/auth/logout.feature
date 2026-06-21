@@ -7,7 +7,7 @@ Feature: Logout
     Given the API is running
     And I am logged in as "alice@example.com"
 
-  @smoke @auth
+  @auth
   Scenario: Logout clears auth cookies and invalidates the refresh token
     Given I have a valid refresh token in my cookie jar
     When I send POST /api/auth/logout

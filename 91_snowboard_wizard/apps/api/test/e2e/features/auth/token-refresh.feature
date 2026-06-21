@@ -7,7 +7,7 @@ Feature: Access token refresh
     Given the API is running
     And I am logged in as "alice@example.com"
 
-  @smoke @auth
+  @auth
   Scenario: Valid refresh token issues a new access token
     Given my "refresh_token" cookie is valid and not expired
     When I send POST /api/auth/refresh
