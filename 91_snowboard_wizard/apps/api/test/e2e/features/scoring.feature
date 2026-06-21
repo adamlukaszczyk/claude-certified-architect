@@ -10,7 +10,7 @@ Feature: Incremental wizard scoring
   Scenario: Empty answers return all-zero partial scores
     When I send POST /api/score with JSON body:
       """
-      {}
+      { "answers": {} }
       """
     Then the response status is 200
     And the response body field "scores.flex" is the number 0
@@ -20,7 +20,7 @@ Feature: Incremental wizard scoring
   Scenario: Powder riding style produces positive taper, float and shape scores
     When I send POST /api/score with JSON body:
       """
-      { "style": "powder" }
+      { "answers": { "style": "powder" } }
       """
     Then the response status is 200
     And the response body field "scores.taper" is greater than 0
@@ -30,7 +30,7 @@ Feature: Incremental wizard scoring
   Scenario: Freestyle riding style produces a negative flex score
     When I send POST /api/score with JSON body:
       """
-      { "style": "freestyle" }
+      { "answers": { "style": "freestyle" } }
       """
     Then the response status is 200
     And the response body field "scores.flex" is less than 0
@@ -38,7 +38,7 @@ Feature: Incremental wizard scoring
   Scenario: Carving riding style produces a positive camber score
     When I send POST /api/score with JSON body:
       """
-      { "style": "carving" }
+      { "answers": { "style": "carving" } }
       """
     Then the response status is 200
     And the response body field "scores.camber" is greater than 0
@@ -46,7 +46,7 @@ Feature: Incremental wizard scoring
   Scenario: Beginner experience reduces flex score
     When I send POST /api/score with JSON body:
       """
-      { "experience": "beginner" }
+      { "answers": { "experience": "beginner" } }
       """
     Then the response status is 200
     And the response body field "scores.flex" is less than 0
@@ -54,22 +54,22 @@ Feature: Incremental wizard scoring
   Scenario Outline: Weight category influences length and flex scores
     When I send POST /api/score with JSON body:
       """
-      { "weightCategory": "<weight>" }
+      { "answers": { "weightCategory": "<weight>" } }
       """
     Then the response body field "scores.length" is <length_dir> 0
     And the response body field "scores.flex" is <flex_dir> 0
 
     Examples:
       | weight    | length_dir   | flex_dir     |
-      | under_55  | less than     | less than    |
-      | over_100  | greater than  | greater than |
+      | under_55  | less than    | less than    |
+      | over_100  | greater than | greater than |
 
   @security
   Scenario: POST /score without Origin header is rejected (CSRF)
     Given the next request will have no Origin or Referer header
     When I send POST /api/score with JSON body:
       """
-      {}
+      { "answers": {} }
       """
     Then the response status is 403
 

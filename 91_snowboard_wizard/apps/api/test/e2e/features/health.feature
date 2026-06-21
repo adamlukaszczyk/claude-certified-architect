@@ -23,7 +23,7 @@ Feature: API health check
     When I send GET /api/health
     Then the response status is 503
     And the response body field "checks.postgresql.status" is "error"
-    And the response body field "status" is "ok"
+    And the response body field "status" is "degraded"
 
   Scenario: Redis is unreachable
     Given Redis is not reachable
