@@ -1,7 +1,8 @@
-// narrative.service.ts - Stage 2: Claude narrative overlay on top of deterministic spec
+// narrative.service.ts - Stage 2: Claude narrative + Redis rate limiting
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Anthropic from '@anthropic-ai/sdk'
+import { RedisService } from '../cache/redis.service'
 import type { Answers, SpecSheet } from '@snowboard/types'
 
 const NARRATIVE_PROMPT = `You are a professional snowboard fitter with 20 years of experience.
@@ -33,18 +34,31 @@ Write exactly four sections separated by blank lines:
 
 Write in second person ("Your board..."). Be specific — reference the actual spec values. No markdown headers or bullet points.`
 
+const RATE_LIMIT_CALLS = 10
+const RATE_LIMIT_WINDOW = 60 // seconds
+
 @Injectable()
 export class NarrativeService {
   private readonly client: Anthropic | null
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly redis: RedisService,
+  ) {
     const apiKey = config.get<string>('anthropic.apiKey') ?? ''
     this.client = apiKey ? new Anthropic({ apiKey }) : null
   }
 
-  async generate(answers: Answers, specSheet: SpecSheet): Promise<string> {
-    if (!this.client) {
-      return `Spec sheet generated: ${specSheet.flexLabel} flex, ${specSheet.lengthCm} cm ${specSheet.shape} with ${specSheet.camberProfile} profile.`
+  async generate(answers: Answers, specSheet: SpecSheet, userId?: string): Promise<string> {
+    const fallback = `Spec sheet generated: ${specSheet.flexLabel} flex, ${specSheet.lengthCm} cm ${specSheet.shape} with ${specSheet.camberProfile} profile.`
+
+    if (!this.client) return fallback
+
+    if (userId) {
+      const rateKey = `rate:claude:${userId}`
+      const count = await this.redis.incr(rateKey)
+      if (count === 1) await this.redis.expire(rateKey, RATE_LIMIT_WINDOW)
+      if (count > RATE_LIMIT_CALLS) return fallback
     }
 
     const prompt = NARRATIVE_PROMPT
@@ -71,6 +85,6 @@ export class NarrativeService {
     })
 
     const textBlock = response.content.find(b => b.type === 'text')
-    return textBlock?.type === 'text' ? textBlock.text : ''
+    return textBlock?.type === 'text' ? textBlock.text : fallback
   }
 }

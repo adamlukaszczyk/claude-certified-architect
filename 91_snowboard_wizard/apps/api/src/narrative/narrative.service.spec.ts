@@ -3,6 +3,7 @@ import { NarrativeService } from './narrative.service'
 import { ConfigService } from '@nestjs/config'
 import Anthropic from '@anthropic-ai/sdk'
 import type { Answers, SpecSheet } from '@snowboard/types'
+import { RedisService } from '../cache/redis.service'
 
 const mockSpecSheet: SpecSheet = {
   lengthCm: 155, waistWidthMm: 248, flexRating: 5, flexLabel: 'Medium',
@@ -12,6 +13,8 @@ const mockSpecSheet: SpecSheet = {
 const mockAnswers: Answers = { experience: 'intermediate', style: 'all-mountain' }
 
 jest.mock('@anthropic-ai/sdk')
+
+const mockRedisService = { incr: jest.fn().mockResolvedValue(1), expire: jest.fn() }
 
 describe('NarrativeService', () => {
   let service: NarrativeService
@@ -27,6 +30,7 @@ describe('NarrativeService', () => {
       providers: [
         NarrativeService,
         { provide: ConfigService, useValue: { get: () => 'sk-ant-test' } },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile()
     service = module.get(NarrativeService)
@@ -43,6 +47,7 @@ describe('NarrativeService', () => {
       providers: [
         NarrativeService,
         { provide: ConfigService, useValue: { get: () => '' } },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile()
     const svcNoKey = moduleNoKey.get(NarrativeService)
