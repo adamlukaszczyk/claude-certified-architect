@@ -21,7 +21,11 @@ export class RedisService implements OnModuleDestroy {
   async get<T>(key: string): Promise<T | null> {
     const raw = await this.client.get(key)
     if (!raw) return null
-    return JSON.parse(raw) as T
+    try {
+      return JSON.parse(raw) as T
+    } catch {
+      return null
+    }
   }
 
   async del(key: string): Promise<void> {
@@ -36,7 +40,7 @@ export class RedisService implements OnModuleDestroy {
     await this.client.expire(key, ttlSeconds)
   }
 
-  onModuleDestroy(): void {
-    this.client.quit()
+  async onModuleDestroy(): Promise<void> {
+    await this.client.quit()
   }
 }
