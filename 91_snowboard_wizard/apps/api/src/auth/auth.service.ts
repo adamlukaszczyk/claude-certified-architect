@@ -12,7 +12,6 @@ import type { UserEntity } from '../entities/user.entity'
 
 type LoginResult = {
   accessToken: string
-  refreshToken: string
   user: UserEntity
 }
 
@@ -52,9 +51,9 @@ export class AuthService {
     )
 
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
-    const refreshToken = await this.issueRefreshToken(user.id)
+    await this.issueRefreshToken(user.id)
 
-    return { accessToken, refreshToken, user }
+    return { accessToken, user }
   }
 
   private async issueRefreshToken(userId: string): Promise<string> {

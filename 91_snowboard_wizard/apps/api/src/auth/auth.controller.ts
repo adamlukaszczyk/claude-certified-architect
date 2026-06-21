@@ -26,6 +26,7 @@ export class AuthController {
       sameSite: 'lax',
       secure: isProduction,
       maxAge: 15 * 60 * 1000, // 15 minutes
+      path: '/',
     })
     return { userId: user.id, email: user.email }
   }
@@ -39,7 +40,7 @@ export class AuthController {
 
   @Get('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token')
+    res.clearCookie('access_token', { path: '/' })
     return { ok: true }
   }
 }
