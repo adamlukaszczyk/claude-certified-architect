@@ -7,7 +7,7 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://wizard:wizard@postgres:5432/wizard
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-wizard}:${POSTGRES_PASSWORD:-wizard}@postgres:5432/${POSTGRES_DB:-wizard}
       - REDIS_URL=redis://redis:6379
     env_file:
       - path: .env.local
@@ -26,15 +26,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: wizard
-      POSTGRES_PASSWORD: wizard
-      POSTGRES_DB: wizard
+      POSTGRES_USER: ${POSTGRES_USER:-wizard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wizard}
+      POSTGRES_DB: ${POSTGRES_DB:-wizard}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U wizard"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wizard}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -45,7 +45,7 @@ services:
       - "6379:6379"
 
   consul-server:
-    image: hashicorp/consul:latest
+    image: hashicorp/consul:2.0.1
     container_name: consul-server
     restart: always
     volumes:
@@ -56,7 +56,7 @@ services:
     command: "agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0"
 
   redis-exporter:
-    image: oliver006/redis_exporter:latest
+    image: oliver006/redis_exporter:v1.86.0
     environment:
       - REDIS_ADDR=redis://redis:6379
     ports:
@@ -65,9 +65,9 @@ services:
       - redis
 
   postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.19.1
     environment:
-      - DATA_SOURCE_NAME=postgresql://wizard:wizard@postgres:5432/wizard?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-wizard}:${POSTGRES_PASSWORD:-wizard}@postgres:5432/${POSTGRES_DB:-wizard}?sslmode=disable
     ports:
       - "9187:9187"
     depends_on:
@@ -75,7 +75,7 @@ services:
         condition: service_healthy
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.5.4
     ports:
       - "9090:9090"
     volumes:
