@@ -2,9 +2,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { createHash, randomBytes } from 'crypto'
 import { OAuth2Client } from 'google-auth-library'
 import { UsersService } from '../users/users.service'
 import type { UserEntity } from '../entities/user.entity'
+import { RefreshTokenEntity } from '../entities/refresh-token.entity'
 
 type LoginResult = {
   accessToken: string
@@ -19,6 +23,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepo: Repository<RefreshTokenEntity>,
   ) {
     this.googleClient = new OAuth2Client(config.get<string>('google.clientId'))
   }
@@ -47,5 +52,20 @@ export class AuthService {
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email })
 
     return { accessToken, user }
+  }
+
+  async issueRefreshToken(userId: string): Promise<string> {
+    const raw = randomBytes(32).toString('base64url')
+    const tokenHash = createHash('sha256').update(raw).digest('hex')
+    const refreshExpiresIn = this.config.get<string>('jwt.refreshExpiresIn') ?? '30d'
+
+    // Parse duration string: format is '<days>d' (e.g. '30d')
+    const match = refreshExpiresIn.match(/^(\d+)d$/)
+    const daysToAdd = match ? parseInt(match[1], 10) : 30
+
+    // Use millisecond arithmetic to avoid timezone/DST edge cases
+    const expiresAt = new Date(Date.now() + daysToAdd * 24 * 60 * 60 * 1000)
+    await this.refreshTokenRepo.save({ userId, tokenHash, expiresAt })
+    return raw
   }
 }
