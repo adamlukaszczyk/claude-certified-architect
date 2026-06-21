@@ -227,7 +227,7 @@ Then('the response body field {string} matches the pattern {string}', function(t
 
 Then('the response body field {string} is one of {string}', function(this: ApiWorld, field: string, csv: string) {
   const actual = this.getField(this.response!.body, field)
-  const options = csv.split(',')
+  const options = csv.split(',').map(s => s.trim())
   assert.ok(
     options.includes(String(actual)),
     `expected field "${field}" to be one of [${csv}] but got "${actual}"`,
