@@ -73,7 +73,7 @@ podman compose up -d --force-recreate consul-server
 
 ## Environment variables
 
-Postgres credentials are parameterized — set them in `.env.local` (loaded automatically by compose if present):
+Postgres credentials are parameterized — set them in `.env` (loaded automatically by compose if present):
 
 ```bash
 POSTGRES_USER=wizard       # default: wizard
