@@ -13,7 +13,7 @@ Feature: Guest wizard completion end-to-end
       """
       { "answers": { "experience": "intermediate", "weightCategory": "w_71_85", "stance": "regular" } }
       """
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "scores.flex" is a number
 
     # Cache progress after Phase 1
@@ -28,14 +28,14 @@ Feature: Guest wizard completion end-to-end
       """
       { "answers": { "experience": "intermediate", "weightCategory": "w_71_85", "style": "all-mountain", "terrainMix": "mixed" } }
       """
-    Then the response status is 200
+    Then the response status is 201
 
     # Phase 3 — Deep Dive scoring
     When I send POST /api/score with JSON body:
       """
       { "answers": { "experience": "intermediate", "weightCategory": "w_71_85", "style": "all-mountain", "terrainMix": "mixed", "speedPreference": "moderate" } }
       """
-    Then the response status is 200
+    Then the response status is 201
 
     # Generate recommendation
     When I send POST /api/recommendations with JSON body:
@@ -54,7 +54,7 @@ Feature: Guest wizard completion end-to-end
 
     # Share link is publicly accessible
     When I send GET /api/recommendations/share/<my-share-token> without auth credentials
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "specSheet.shape" is a non-empty string
 
     # Direct ID access without auth is blocked

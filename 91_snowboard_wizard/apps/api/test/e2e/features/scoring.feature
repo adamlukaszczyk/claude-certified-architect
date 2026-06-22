@@ -12,7 +12,7 @@ Feature: Incremental wizard scoring
       """
       { "answers": {} }
       """
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "scores.flex" is the number 0
     And the response body field "scores.length" is the number 0
     And the response body field "scores.camber" is the number 0
@@ -22,7 +22,7 @@ Feature: Incremental wizard scoring
       """
       { "answers": { "style": "powder" } }
       """
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "scores.taper" is greater than 0
     And the response body field "scores.float" is greater than 0
     And the response body field "scores.shape" is greater than 0
@@ -32,7 +32,7 @@ Feature: Incremental wizard scoring
       """
       { "answers": { "style": "freestyle" } }
       """
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "scores.flex" is less than 0
 
   Scenario: Carving riding style produces a positive camber score
@@ -40,7 +40,7 @@ Feature: Incremental wizard scoring
       """
       { "answers": { "style": "carving" } }
       """
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "scores.camber" is greater than 0
 
   Scenario: Beginner experience reduces flex score
@@ -48,7 +48,7 @@ Feature: Incremental wizard scoring
       """
       { "answers": { "experience": "beginner" } }
       """
-    Then the response status is 200
+    Then the response status is 201
     And the response body field "scores.flex" is less than 0
 
   Scenario Outline: Weight category influences length and flex scores

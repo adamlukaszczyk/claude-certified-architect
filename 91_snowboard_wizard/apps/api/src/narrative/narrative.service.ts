@@ -1,5 +1,5 @@
 // narrative.service.ts - Stage 2: Claude narrative + Redis rate limiting
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Anthropic from '@anthropic-ai/sdk'
 import { RedisService } from '../cache/redis.service'
@@ -39,10 +39,11 @@ const RATE_LIMIT_WINDOW = 60 // seconds
 
 @Injectable()
 export class NarrativeService {
+  private readonly logger = new Logger(NarrativeService.name)
   private readonly client: Anthropic | null
 
   constructor(
-    private readonly config: ConfigService,
+    config: ConfigService,
     private readonly redis: RedisService,
   ) {
     const apiKey = config.get<string>('anthropic.apiKey') ?? ''
@@ -78,13 +79,17 @@ export class NarrativeService {
       .replace('{baseType}', specSheet.baseType)
       .replace('{floatPriority}', specSheet.floatPriority)
 
-    const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 600,
-      messages: [{ role: 'user', content: prompt }],
-    })
+    const requestBody = { model: 'claude-sonnet-4-6', max_tokens: 600, messages: [{ role: 'user' as const, content: prompt }] }
+    this.logger.debug(`Anthropic request body: ${JSON.stringify(requestBody)}`)
 
-    const textBlock = response.content.find(b => b.type === 'text')
-    return textBlock?.type === 'text' ? textBlock.text : fallback
+    try {
+      const response = await this.client.messages.create(requestBody)
+      this.logger.debug(`Anthropic response: ${JSON.stringify(response)}`)
+      const textBlock = response.content.find(b => b.type === 'text')
+      return textBlock?.type === 'text' ? textBlock.text : fallback
+    } catch (err) {
+      this.logger.error(`Anthropic API call failed, using fallback. Error: ${err}`)
+      return fallback
+    }
   }
 }
