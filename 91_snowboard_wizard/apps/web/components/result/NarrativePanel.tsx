@@ -32,7 +32,7 @@ export function NarrativePanel({ narrative }: NarrativePanelProps) {
             key={i}
             initial={{ opacity: 0, filter: 'blur(4px)' }}
             animate={{ opacity: 1, filter: 'blur(0px)' }}
-            transition={{ delay: i * 0.015, duration: 0.2 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25, delay: i * 0.015 }}
           >
             {word}
           </motion.span>

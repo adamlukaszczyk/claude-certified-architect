@@ -40,7 +40,7 @@ export function SpecSheet({ spec }: SpecSheetProps) {
             className="flex items-center justify-between border-b border-[var(--color-border)] pb-2"
             initial={{ scaleX: 0, opacity: 0 }}
             animate={{ scaleX: 1, opacity: 1 }}
-            transition={{ delay: i * 0.06, duration: 0.3, ease: 'easeOut' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25, delay: i * 0.06 }}
             style={{ transformOrigin: 'left' }}
           >
             <span className="text-sm text-[var(--color-muted)]">{row.label}</span>
