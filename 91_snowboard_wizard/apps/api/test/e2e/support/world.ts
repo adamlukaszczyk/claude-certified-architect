@@ -19,7 +19,7 @@ export class ApiWorld extends World {
 
   constructor(options: IWorldOptions) {
     super(options)
-    this.baseUrl = process.env.API_URL ?? 'http://localhost:3001'
+    this.baseUrl = process.env.API_URL ?? 'http://localhost:3002'
     this.apiOrigin = process.env.API_ORIGIN ?? 'http://localhost:3000'
   }
 

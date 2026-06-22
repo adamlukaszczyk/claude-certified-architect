@@ -25,7 +25,7 @@ Feature: Create a recommendation
     And the response body field "specSheet.flexLabel" is one of "Soft,Medium,Medium-Stiff,Stiff"
     And the response body field "specSheet.lengthCm" is a number between 130 and 175
     And the response body field "specSheet.shape" is one of "twin,directional-twin,directional,tapered-directional"
-    And the response body field "specSheet.camberProfile" is one of "camber,rocker,hybrid,flat"
+    And the response body field "specSheet.camberProfile" is one of "rocker,flat-to-rocker,hybrid,camber,aggressive-camber"
     And the response body field "specSheet.baseType" is one of "sintered,extruded"
     And the response body field "claudeNarrative" is a non-empty string
 

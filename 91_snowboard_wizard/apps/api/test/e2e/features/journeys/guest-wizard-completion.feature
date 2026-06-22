@@ -54,7 +54,7 @@ Feature: Guest wizard completion end-to-end
 
     # Share link is publicly accessible
     When I send GET /api/recommendations/share/<my-share-token> without auth credentials
-    Then the response status is 201
+    Then the response status is 200
     And the response body field "specSheet.shape" is a non-empty string
 
     # Direct ID access without auth is blocked

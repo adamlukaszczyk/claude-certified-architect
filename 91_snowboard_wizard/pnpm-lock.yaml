@@ -93,6 +93,9 @@ importers:
       '@cucumber/cucumber':
         specifier: ^11.0.0
         version: 11.3.0
+      '@cucumber/pretty-formatter':
+        specifier: ^4.0.0
+        version: 4.0.0(@cucumber/messages@27.2.0)
       '@nestjs/cli':
         specifier: ^10.0.0
         version: 10.4.9
@@ -444,8 +447,18 @@ packages:
   '@cucumber/messages@27.2.0':
     resolution: {integrity: sha512-f2o/HqKHgsqzFLdq6fAhfG1FNOQPdBdyMGpKwhb7hZqg0yZtx9BVqkTyuoNk83Fcvk3wjMVfouFXXHNEk4nddA==}
 
+  '@cucumber/pretty-formatter@4.0.0':
+    resolution: {integrity: sha512-vWKHUfjMphtbeHHlQBZ1gQzPL3/HE/O2dNnpBqEOIDwvhp7tKvqSe8kscp2H7pArbxN6euEpR5JbstJdzo3iyg==}
+    peerDependencies:
+      '@cucumber/messages': '*'
+
   '@cucumber/query@13.6.0':
     resolution: {integrity: sha512-tiDneuD5MoWsJ9VKPBmQok31mSX9Ybl+U4wqDoXeZgsXHDURqzM3rnpWVV3bC34y9W6vuFxrlwF/m7HdOxwqRw==}
+    peerDependencies:
+      '@cucumber/messages': '*'
+
+  '@cucumber/query@16.0.0':
+    resolution: {integrity: sha512-CtGBHLc92y1RNogXGOFVF7so+XdLR5rVuJGsS6nH7yLeayyYhdV8lYW/LG8R05cm4irG/RO6Wn5I2CAgxMhmwQ==}
     peerDependencies:
       '@cucumber/messages': '*'
 
@@ -2248,6 +2261,10 @@ packages:
     resolution: {integrity: sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ==}
     engines: {node: '>=12'}
 
+  luxon@3.7.2:
+    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+    engines: {node: '>=12'}
+
   magic-string@0.30.8:
     resolution: {integrity: sha512-ISQTe55T2ao7XtlAStud6qwYPZjE4GK1S/BeVPus4jrq6JuOnQ00YKQC581RWhR122W7msZV263KzVeLoqidyQ==}
     engines: {node: '>=12'}
@@ -3740,7 +3757,19 @@ snapshots:
       reflect-metadata: 0.2.2
       uuid: 11.0.5
 
+  '@cucumber/pretty-formatter@4.0.0(@cucumber/messages@27.2.0)':
+    dependencies:
+      '@cucumber/messages': 27.2.0
+      '@cucumber/query': 16.0.0(@cucumber/messages@27.2.0)
+      luxon: 3.7.2
+
   '@cucumber/query@13.6.0(@cucumber/messages@27.2.0)':
+    dependencies:
+      '@cucumber/messages': 27.2.0
+      '@teppeis/multimaps': 3.0.0
+      lodash.sortby: 4.7.0
+
+  '@cucumber/query@16.0.0(@cucumber/messages@27.2.0)':
     dependencies:
       '@cucumber/messages': 27.2.0
       '@teppeis/multimaps': 3.0.0
@@ -6013,6 +6042,8 @@ snapshots:
       yallist: 3.1.1
 
   luxon@3.6.1: {}
+
+  luxon@3.7.2: {}
 
   magic-string@0.30.8:
     dependencies:

@@ -127,7 +127,9 @@ export class HealthService {
         signal: ac.signal,
       })
       const body = (await res.json()) as { error?: string }
-      if (body.error === 'invalid_grant') {
+      if (body.error === 'invalid_grant' || body.error === 'invalid_request') {
+        // invalid_grant: client_id recognised, dummy code rejected (expected)
+        // invalid_request: client_id recognised but client_secret missing — still confirms registration
         result = { status: 'ok' }
       } else if (body.error === 'invalid_client') {
         result = { status: 'error', error: 'GOOGLE_CLIENT_ID not recognised by Google' }
