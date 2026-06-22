@@ -71,6 +71,7 @@ export function WizardShell({ questions }: WizardShellProps) {
       )
       const isPhase3Last =
         currentPhase === 3 &&
+        currentQuestionIndex >= updatedPhase3Questions.length - 1 &&
         updatedPhase3Questions.every((q) => updatedAnswers[q.id as keyof typeof updatedAnswers] !== undefined)
       if (isPhase3Last) {
         try {
