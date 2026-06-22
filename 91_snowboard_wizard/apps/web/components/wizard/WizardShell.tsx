@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useCallback, useRef } from 'react'
+import { useEffect, useMemo, useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { rules } from '@snowboard/wizard-schema/rules'
@@ -7,8 +7,10 @@ import { useWizardStore } from '@/store/wizard-store'
 import { postScore, postRecommendation, saveSession } from '@/lib/api-client'
 import { getOrCreateSessionId } from '@/lib/session-id'
 import { QuestionCard } from './QuestionCard'
+import { ProgressTrail } from './ProgressTrail'
+import { PhaseTransition } from './PhaseTransition'
+import { LiveScoreSidebar } from './LiveScoreSidebar'
 import type { Question } from '@snowboard/wizard-schema'
-import type { Answers } from '@snowboard/types'
 
 interface WizardShellProps {
   questions: Question[]
@@ -16,11 +18,13 @@ interface WizardShellProps {
 
 export function WizardShell({ questions }: WizardShellProps) {
   const router = useRouter()
-  const scoreSeqRef = useRef(0)
+  const [showTransition, setShowTransition] = useState(false)
+
   const {
     answers,
     currentPhase,
     currentQuestionIndex,
+    phaseSizes,
     setScores,
     setPhaseSize,
     setRecommendation,
@@ -34,7 +38,7 @@ export function WizardShell({ questions }: WizardShellProps) {
         if (q.phase !== currentPhase) return false
         if (!q.showIf) return true
         const fn = rules[q.showIf as keyof typeof rules]
-        return fn ? fn(answers, undefined) : true
+        return fn ? fn(answers as Parameters<typeof fn>[0], undefined) : true
       }),
     [questions, currentPhase, answers]
   )
@@ -43,36 +47,27 @@ export function WizardShell({ questions }: WizardShellProps) {
     setPhaseSize(currentPhase, visibleQuestions.length)
   }, [currentPhase, visibleQuestions.length, setPhaseSize])
 
+  const totalAnswered = Object.values(phaseSizes).reduce((a, b) => a + b, 0)
+  const totalQuestions = questions.length
+  const progress = totalAnswered > 0 ? Math.min(1, totalAnswered / totalQuestions) : 0
+
   const currentQuestion = visibleQuestions[currentQuestionIndex] ?? null
 
   const handleAnswer = useCallback(
     async (questionId: string, value: string | number) => {
       answerQuestion(questionId, value)
       const sessionId = getOrCreateSessionId()
-
       const updatedAnswers = { ...answers, [questionId]: value }
 
-      // Fire-and-forget score update with sequence guard to drop stale responses
-      const seq = ++scoreSeqRef.current
-      postScore(updatedAnswers).then((scores) => {
-        if (seq === scoreSeqRef.current) setScores(scores)
-      }).catch(() => {})
+      postScore(updatedAnswers).then(setScores).catch(() => {})
+      saveSession(sessionId, updatedAnswers, currentPhase).catch(() => {})
 
-      saveSession(sessionId, updatedAnswers, currentPhase).catch((err) =>
-        console.error('saveSession failed', err)
-      )
-
-      // If last question of phase 3, create recommendation.
-      // Recompute against updatedAnswers to avoid stale visibleQuestions.
-      const updatedPhase3Questions = questions.filter(
-        (q) =>
-          q.phase === 3 &&
-          (!q.showIf || (rules[q.showIf as keyof typeof rules]?.(updatedAnswers as Answers, undefined) ?? true))
-      )
       const isPhase3Last =
-        currentPhase === 3 &&
-        updatedPhase3Questions.every((q) => updatedAnswers[q.id as keyof typeof updatedAnswers] !== undefined)
+        currentPhase === 3 && currentQuestionIndex === visibleQuestions.length - 1
+      const isPhaseLastQ = currentQuestionIndex === visibleQuestions.length - 1
+
       if (isPhase3Last) {
+        setShowTransition(true)
         try {
           const rec = await postRecommendation(updatedAnswers)
           setRecommendation({
@@ -84,10 +79,13 @@ export function WizardShell({ questions }: WizardShellProps) {
           router.push(`/result/${rec.shareToken}`)
         } catch (err) {
           console.error('Failed to create recommendation', err)
+          setShowTransition(false)
         }
+      } else if (isPhaseLastQ) {
+        setShowTransition(true)
       }
     },
-    [answers, currentPhase, questions, answerQuestion, setScores, setRecommendation, router]
+    [answers, currentPhase, currentQuestionIndex, visibleQuestions.length, answerQuestion, setScores, setRecommendation, router]
   )
 
   if (!currentQuestion) {
@@ -100,15 +98,30 @@ export function WizardShell({ questions }: WizardShellProps) {
 
   return (
     <div className="min-h-screen px-4 py-12">
-      <div className="mx-auto max-w-3xl">
-        <AnimatePresence mode="wait">
-          <QuestionCard
-            key={currentQuestion.id}
-            question={currentQuestion}
-            onAnswer={handleAnswer}
-            onBack={goBack}
-          />
-        </AnimatePresence>
+      {showTransition && (
+        <PhaseTransition onComplete={() => setShowTransition(false)} />
+      )}
+
+      <div className="mx-auto flex max-w-5xl gap-8">
+        {/* Progress trail (left, desktop) */}
+        <div className="hidden lg:flex flex-col items-center pt-4">
+          <ProgressTrail progress={progress} />
+        </div>
+
+        {/* Question card */}
+        <div className="flex-1">
+          <AnimatePresence mode="wait">
+            <QuestionCard
+              key={currentQuestion.id}
+              question={currentQuestion}
+              onAnswer={handleAnswer}
+              onBack={goBack}
+            />
+          </AnimatePresence>
+        </div>
+
+        {/* Live score sidebar */}
+        <LiveScoreSidebar />
       </div>
     </div>
   )
