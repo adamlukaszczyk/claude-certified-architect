@@ -2,5 +2,43 @@
   "name": "@snowboard/web",
   "version": "0.0.1",
   "private": true,
-  "scripts": {}
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@snowboard/types": "workspace:*",
+    "@snowboard/ui": "workspace:*",
+    "@snowboard/wizard-schema": "workspace:*",
+    "next": "14.2.29",
+    "next-auth": "^5.0.0-beta.28",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.0",
+    "framer-motion": "^11.0.0",
+    "gsap": "^3.12.0",
+    "@react-three/fiber": "^8.0.0",
+    "@react-three/drei": "^9.0.0",
+    "three": "^0.168.0",
+    "clsx": "^2.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/three": "^0.168.0",
+    "autoprefixer": "^10.4.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.6.0"
+  }
 }
