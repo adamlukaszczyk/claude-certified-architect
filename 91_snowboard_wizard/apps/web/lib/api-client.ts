@@ -12,7 +12,12 @@ async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   })
   if (!res.ok) throw new Error(`API error ${res.status}`)
   const text = await res.text()
-  return (text ? JSON.parse(text) : undefined) as T
+  if (!text) return undefined as T
+  try {
+    return JSON.parse(text) as T
+  } catch (e) {
+    throw new Error(`API error: invalid JSON response`)
+  }
 }
 
 export async function postScore(answers: Partial<Answers>): Promise<PartialScores> {

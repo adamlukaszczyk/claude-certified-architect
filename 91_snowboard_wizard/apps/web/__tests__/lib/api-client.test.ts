@@ -1,6 +1,6 @@
 // api-client.test.ts - Tests for the typed API client
 
-import { postScore, getByShareToken } from '@/lib/api-client'
+import { postScore, getByShareToken, saveSession } from '@/lib/api-client'
 
 const API = 'http://localhost:3001'
 
@@ -31,6 +31,30 @@ describe('postScore', () => {
   it('throws on non-ok response', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500 })
     await expect(postScore({})).rejects.toThrow('API error 500')
+  })
+
+  it('throws on invalid JSON response', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      text: async () => '{invalid json',
+    })
+    await expect(postScore({})).rejects.toThrow('invalid JSON response')
+  })
+})
+
+describe('saveSession', () => {
+  it('handles empty response body (HTTP 200 with no content)', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      text: async () => '',
+    })
+
+    await saveSession('sess-123', {}, 1)
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${API}/api/sessions/sess-123`,
+      expect.objectContaining({ method: 'PUT', credentials: 'include' })
+    )
   })
 })
 
