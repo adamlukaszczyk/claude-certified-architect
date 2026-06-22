@@ -1,5 +1,10 @@
+import dynamic from 'next/dynamic'
 import { HeroSection } from '@/components/landing/HeroSection'
-import { SnowScene } from '@/components/landing/SnowScene'
+
+const SnowScene = dynamic(
+  () => import('@/components/landing/SnowScene').then((m) => m.SnowScene),
+  { ssr: false }
+)
 
 export default function LandingPage() {
   return (

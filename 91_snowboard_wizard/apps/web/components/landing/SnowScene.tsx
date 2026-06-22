@@ -3,7 +3,7 @@ import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function SnowParticles() {
+function SnowParticles({ color }: { color: string }) {
   const ref = useRef<THREE.Points>(null!)
 
   const positions = useMemo(() => {
@@ -31,16 +31,21 @@ function SnowParticles() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial color="#7DD3FC" size={0.04} transparent opacity={0.7} />
+      <pointsMaterial color={color} size={0.04} transparent opacity={0.7} />
     </points>
   )
 }
 
 export function SnowScene() {
+  const snowColor =
+    typeof window !== 'undefined'
+      ? getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#7DD3FC'
+      : '#7DD3FC'
+
   return (
     <div className="absolute inset-0 pointer-events-none" aria-hidden>
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }} gl={{ alpha: true }}>
-        <SnowParticles />
+        <SnowParticles color={snowColor} />
       </Canvas>
     </div>
   )
