@@ -1,14 +1,14 @@
 'use client'
-import { useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { rules } from '@snowboard/wizard-schema/rules'
 import { useWizardStore } from '@/store/wizard-store'
-import { postScore, postRecommendation } from '@/lib/api-client'
+import { postScore, postRecommendation, saveSession } from '@/lib/api-client'
 import { getOrCreateSessionId } from '@/lib/session-id'
-import { saveSession } from '@/lib/api-client'
 import { QuestionCard } from './QuestionCard'
 import type { Question } from '@snowboard/wizard-schema'
+import type { Answers } from '@snowboard/types'
 
 interface WizardShellProps {
   questions: Question[]
@@ -16,6 +16,7 @@ interface WizardShellProps {
 
 export function WizardShell({ questions }: WizardShellProps) {
   const router = useRouter()
+  const scoreSeqRef = useRef(0)
   const {
     answers,
     currentPhase,
@@ -51,16 +52,29 @@ export function WizardShell({ questions }: WizardShellProps) {
 
       const updatedAnswers = { ...answers, [questionId]: value }
 
-      // Fire-and-forget side effects
-      postScore(updatedAnswers).then(setScores).catch(() => {})
-      saveSession(sessionId, updatedAnswers as any, currentPhase).catch(() => {})
+      // Fire-and-forget score update with sequence guard to drop stale responses
+      const seq = ++scoreSeqRef.current
+      postScore(updatedAnswers).then((scores) => {
+        if (seq === scoreSeqRef.current) setScores(scores)
+      }).catch(() => {})
 
-      // If last question of phase 3, create recommendation
+      saveSession(sessionId, updatedAnswers, currentPhase).catch((err) =>
+        console.error('saveSession failed', err)
+      )
+
+      // If last question of phase 3, create recommendation.
+      // Recompute against updatedAnswers to avoid stale visibleQuestions.
+      const updatedPhase3Questions = questions.filter(
+        (q) =>
+          q.phase === 3 &&
+          (!q.showIf || (rules[q.showIf as keyof typeof rules]?.(updatedAnswers as Answers, undefined) ?? true))
+      )
       const isPhase3Last =
-        currentPhase === 3 && currentQuestionIndex === visibleQuestions.length - 1
+        currentPhase === 3 &&
+        updatedPhase3Questions.every((q) => updatedAnswers[q.id as keyof typeof updatedAnswers] !== undefined)
       if (isPhase3Last) {
         try {
-          const rec = await postRecommendation(updatedAnswers as any)
+          const rec = await postRecommendation(updatedAnswers)
           setRecommendation({
             id: rec.id,
             shareToken: rec.shareToken,
@@ -73,7 +87,7 @@ export function WizardShell({ questions }: WizardShellProps) {
         }
       }
     },
-    [answers, currentPhase, currentQuestionIndex, visibleQuestions.length, answerQuestion, setScores, setRecommendation, router]
+    [answers, currentPhase, questions, answerQuestion, setScores, setRecommendation, router]
   )
 
   if (!currentQuestion) {

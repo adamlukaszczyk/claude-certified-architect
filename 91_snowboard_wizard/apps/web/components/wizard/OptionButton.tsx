@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface OptionButtonProps {
@@ -11,12 +11,20 @@ interface OptionButtonProps {
 export function OptionButton({ id, text, onSelect }: OptionButtonProps) {
   const [rippleKey, setRippleKey] = useState(0)
   const [showRipple, setShowRipple] = useState(false)
+  const rippleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (rippleTimerRef.current !== null) clearTimeout(rippleTimerRef.current)
+    }
+  }, [])
 
   function handleClick() {
     setRippleKey((k) => k + 1)
     setShowRipple(true)
     onSelect(id)
-    setTimeout(() => {
+    if (rippleTimerRef.current !== null) clearTimeout(rippleTimerRef.current)
+    rippleTimerRef.current = setTimeout(() => {
       setShowRipple(false)
     }, 300)
   }

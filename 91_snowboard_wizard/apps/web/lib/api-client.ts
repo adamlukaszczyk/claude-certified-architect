@@ -28,7 +28,7 @@ export async function postScore(answers: Partial<Answers>): Promise<PartialScore
   return data.scores
 }
 
-export async function saveSession(id: string, answers: Answers, phase: number): Promise<void> {
+export async function saveSession(id: string, answers: Partial<Answers>, phase: number): Promise<void> {
   await apiFetch<void>(`/api/sessions/${id}`, {
     method: 'PUT',
     body: JSON.stringify({ answers, phase }),
@@ -53,7 +53,7 @@ export type RecommendationResponse = {
 }
 
 export async function postRecommendation(
-  answers: Answers,
+  answers: Partial<Answers>,
   sessionName?: string
 ): Promise<RecommendationResponse> {
   return apiFetch<RecommendationResponse>('/api/recommendations', {
