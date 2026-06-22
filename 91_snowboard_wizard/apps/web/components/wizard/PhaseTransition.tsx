@@ -17,7 +17,7 @@ export function PhaseTransition({ onComplete }: PhaseTransitionProps) {
     const particles: HTMLDivElement[] = []
     for (let i = 0; i < 80; i++) {
       const p = document.createElement('div')
-      p.className = 'absolute h-2 w-2 rounded-full bg-[#F0F4FF]'
+      p.className = 'absolute h-2 w-2 rounded-full bg-[var(--color-secondary)]'
       p.style.left = '50%'
       p.style.top = '50%'
       container.appendChild(p)

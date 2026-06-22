@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Drawer } from '@snowboard/ui'
 import { useWizardStore } from '@/store/wizard-store'
@@ -19,9 +19,6 @@ const SCORE_LABELS: Record<keyof PartialScores, string> = {
 }
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
-  const prevRef = useRef(value)
-  useEffect(() => { prevRef.current = value }, [value])
-
   return (
     <div className="mb-3">
       <div className="flex justify-between text-xs text-[var(--color-muted)] mb-1">
@@ -31,7 +28,7 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
           className="font-mono text-[var(--color-primary)]"
           initial={{ opacity: 0.4 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           {value.toFixed(1)}
         </motion.span>
@@ -40,7 +37,7 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
         <motion.div
           className="h-1 rounded-full bg-[var(--color-primary)]"
           animate={{ width: `${Math.min(100, Math.max(0, (value / 15) * 100))}%` }}
-          transition={{ duration: 0.5 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         />
       </div>
     </div>
