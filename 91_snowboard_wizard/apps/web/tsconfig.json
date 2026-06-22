@@ -13,6 +13,7 @@
       "@/*": ["./*"],
       "@snowboard/wizard-schema/rules": ["../../packages/wizard-schema/src/rules.ts"]
     },
+    "types": ["jest"],
     "plugins": [{ "name": "next" }]
   },
   "include": [".", "**/*.ts", "**/*.tsx", "next-env.d.ts"],

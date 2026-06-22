@@ -15,7 +15,11 @@ export async function authenticateWithNestJs(guestSessionId?: string): Promise<{
 
   const res = await fetch(`${API_URL}/api/auth/google`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Origin': process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+    },
+    credentials: 'include',
     body: JSON.stringify(body),
   })
 

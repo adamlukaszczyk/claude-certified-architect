@@ -77,7 +77,7 @@ export const useWizardStore = create<WizardState>()(
           const q = allQuestions[i]
           if (!q.showIf) continue
           const ruleFn = rules[q.showIf as keyof typeof rules]
-          if (ruleFn && !ruleFn(updatedAnswers)) {
+          if (ruleFn && !ruleFn(updatedAnswers as Answers, undefined)) {
             const pruneKey = toAnswerKey(q.id)
             delete updatedAnswers[pruneKey]
           }

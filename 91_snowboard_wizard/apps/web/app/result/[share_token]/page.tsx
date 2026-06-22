@@ -1,10 +1,12 @@
 // page.tsx - Result page: renders spec sheet, narrative, refinement panel, and save prompt
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { getByShareToken } from '@/lib/api-client'
 import { SpecSheet } from '@/components/result/SpecSheet'
 import { NarrativePanel } from '@/components/result/NarrativePanel'
 import { RefinementPanel } from '@/components/result/RefinementPanel'
 import { SavePrompt } from '@/components/result/SavePrompt'
+import { SaveCallbackHandler } from '@/components/result/SaveCallbackHandler'
 import { loadQuestions, SCHEMA_ROOT } from '@snowboard/wizard-schema'
 
 interface Props {
@@ -31,6 +33,7 @@ export default async function ResultPage({ params }: Props) {
 
       <RefinementPanel questions={questions} />
       <SavePrompt />
+      <Suspense><SaveCallbackHandler /></Suspense>
     </div>
   )
 }
