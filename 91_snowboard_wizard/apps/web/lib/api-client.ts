@@ -11,7 +11,8 @@ async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...init.headers },
   })
   if (!res.ok) throw new Error(`API error ${res.status}`)
-  return res.json() as Promise<T>
+  const text = await res.text()
+  return (text ? JSON.parse(text) : undefined) as T
 }
 
 export async function postScore(answers: Partial<Answers>): Promise<PartialScores> {
@@ -57,7 +58,7 @@ export async function postRecommendation(
 }
 
 export async function getByShareToken(token: string): Promise<RecommendationResponse> {
-  return apiFetch<RecommendationResponse>(`/api/recommendations/share/${token}`)
+  return apiFetch<RecommendationResponse>(`/api/recommendations/share/${encodeURIComponent(token)}`)
 }
 
 export type MeResponse = { id: string; email: string; name: string | null; avatarUrl: string | null }

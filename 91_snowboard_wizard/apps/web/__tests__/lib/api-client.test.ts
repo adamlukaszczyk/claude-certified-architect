@@ -1,6 +1,6 @@
 // api-client.test.ts - Tests for the typed API client
 
-import { postScore, postRecommendation, getByShareToken } from '@/lib/api-client'
+import { postScore, getByShareToken } from '@/lib/api-client'
 
 const API = 'http://localhost:3001'
 
@@ -16,7 +16,7 @@ describe('postScore', () => {
   it('calls POST /api/score and returns scores', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ scores: { flex: 7, length: 3 } }),
+      text: async () => JSON.stringify({ scores: { flex: 7, length: 3 } }),
     })
 
     const result = await postScore({ experience: 'advanced' })
@@ -39,7 +39,7 @@ describe('getByShareToken', () => {
     const mockRec = { id: 'abc', shareToken: 'tok', specSheet: {}, claudeNarrative: null }
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockRec,
+      text: async () => JSON.stringify(mockRec),
     })
 
     const result = await getByShareToken('tok')
@@ -49,5 +49,20 @@ describe('getByShareToken', () => {
       expect.objectContaining({ credentials: 'include' })
     )
     expect(result).toEqual(mockRec)
+  })
+
+  it('URL-encodes special characters in token', async () => {
+    const mockRec = { id: 'abc', shareToken: 'tok+123', specSheet: {}, claudeNarrative: null }
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      text: async () => JSON.stringify(mockRec),
+    })
+
+    await getByShareToken('tok+123')
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${API}/api/recommendations/share/tok%2B123`,
+      expect.objectContaining({ credentials: 'include' })
+    )
   })
 })
