@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useCallback, useState } from 'react'
+import { useEffect, useMemo, useCallback, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { rules } from '@snowboard/wizard-schema/rules'
@@ -11,6 +11,7 @@ import { ProgressTrail } from './ProgressTrail'
 import { PhaseTransition } from './PhaseTransition'
 import { LiveScoreSidebar } from './LiveScoreSidebar'
 import type { Question } from '@snowboard/wizard-schema'
+import type { Answers } from '@snowboard/types'
 
 interface WizardShellProps {
   questions: Question[]
@@ -19,6 +20,8 @@ interface WizardShellProps {
 export function WizardShell({ questions }: WizardShellProps) {
   const router = useRouter()
   const [showTransition, setShowTransition] = useState(false)
+  // Sequence guard: drop stale postScore responses that arrive out-of-order
+  const scoreSeqRef = useRef(0)
 
   const {
     answers,
@@ -47,9 +50,10 @@ export function WizardShell({ questions }: WizardShellProps) {
     setPhaseSize(currentPhase, visibleQuestions.length)
   }, [currentPhase, visibleQuestions.length, setPhaseSize])
 
-  const totalAnswered = Object.values(phaseSizes).reduce((a, b) => a + b, 0)
+  // Progress: answered question count / total questions
+  const answeredCount = Object.keys(answers).length
   const totalQuestions = questions.length
-  const progress = totalAnswered > 0 ? Math.min(1, totalAnswered / totalQuestions) : 0
+  const progress = totalQuestions > 0 ? Math.min(1, answeredCount / totalQuestions) : 0
 
   const currentQuestion = visibleQuestions[currentQuestionIndex] ?? null
 
@@ -59,11 +63,25 @@ export function WizardShell({ questions }: WizardShellProps) {
       const sessionId = getOrCreateSessionId()
       const updatedAnswers = { ...answers, [questionId]: value }
 
-      postScore(updatedAnswers).then(setScores).catch(() => {})
-      saveSession(sessionId, updatedAnswers, currentPhase).catch(() => {})
+      // Fire-and-forget score update with sequence guard to drop stale responses
+      const seq = ++scoreSeqRef.current
+      postScore(updatedAnswers).then((scores) => {
+        if (seq === scoreSeqRef.current) setScores(scores)
+      }).catch(() => {})
 
+      saveSession(sessionId, updatedAnswers, currentPhase).catch((err) =>
+        console.error('saveSession failed', err)
+      )
+
+      // Recompute phase-3 visibility against updatedAnswers to avoid stale showIf checks
+      const updatedPhase3Questions = questions.filter(
+        (q) =>
+          q.phase === 3 &&
+          (!q.showIf || (rules[q.showIf as keyof typeof rules]?.(updatedAnswers as Answers, undefined) ?? true))
+      )
       const isPhase3Last =
-        currentPhase === 3 && currentQuestionIndex === visibleQuestions.length - 1
+        currentPhase === 3 &&
+        updatedPhase3Questions.every((q) => updatedAnswers[q.id as keyof typeof updatedAnswers] !== undefined)
       const isPhaseLastQ = currentQuestionIndex === visibleQuestions.length - 1
 
       if (isPhase3Last) {
@@ -85,7 +103,7 @@ export function WizardShell({ questions }: WizardShellProps) {
         setShowTransition(true)
       }
     },
-    [answers, currentPhase, currentQuestionIndex, visibleQuestions.length, answerQuestion, setScores, setRecommendation, router]
+    [answers, currentPhase, currentQuestionIndex, visibleQuestions.length, questions, answerQuestion, setScores, setRecommendation, router]
   )
 
   if (!currentQuestion) {
