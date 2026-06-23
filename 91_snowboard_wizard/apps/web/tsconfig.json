@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "jsx": "preserve",
     "module": "preserve",
     "moduleResolution": "bundler",
@@ -10,12 +13,30 @@
     "incremental": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./*"],
-      "@snowboard/wizard-schema/rules": ["../../packages/wizard-schema/src/rules.ts"]
+      "@/*": [
+        "./*"
+      ],
+      "@snowboard/wizard-schema/rules": [
+        "../../packages/wizard-schema/src/rules.ts"
+      ]
     },
-    "types": ["jest"],
-    "plugins": [{ "name": "next" }]
+    "types": [
+      "jest"
+    ],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": [".", "**/*.ts", "**/*.tsx", "next-env.d.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    ".",
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
