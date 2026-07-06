@@ -17,6 +17,7 @@ load_dotenv()
 
 console = Console()
 messages = []  # Conversation history
+tool_history = set() # Track which tools have been called successfully
 
 def load_system_prompt():
     prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
@@ -35,7 +36,7 @@ def load_system_prompt():
 
 def check_prerequisite(tool_name, tool_history):
     """Block process_refund unless get_customer has already been called successfully."""
-    # TODO: Check if tool_name is "process_refund" and if "get_customer" is NOT
+    # Check if tool_name is "process_refund" and if "get_customer" is NOT
     # in tool_history. If the prerequisite is missing, return a dict with:
     #   error: True
     #   errorCategory: "validation"
@@ -115,7 +116,6 @@ def run_agent(user_message):
     system_template = load_system_prompt()
 
     messages.append({"role": "user", "content": user_message})
-    tool_history = set()
     # [Task 5.1] — case_facts: verified transactional facts injected into system prompt
     case_facts = "No facts collected yet."
 
@@ -137,6 +137,7 @@ def run_agent(user_message):
                     max_tokens=1024,
                     system=system_prompt,
                     tools=ALL_TOOLS,
+                    tool_choice={"type": "auto", "disable_parallel_tool_use": True},
                     messages=messages,
                 )
         except Exception as e:
@@ -210,6 +211,7 @@ def run_agent(user_message):
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
     messages.clear()
+    tool_history.clear()
 
 
 
