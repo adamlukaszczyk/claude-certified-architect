@@ -16,7 +16,7 @@ from tools import ALL_TOOLS, TOOL_FUNCTIONS
 load_dotenv()
 
 console = Console()
-
+messages = []  # Conversation history
 
 def load_system_prompt():
     prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
@@ -42,6 +42,13 @@ def check_prerequisite(tool_name, tool_history):
     #   isRetryable: True
     #   message: explaining that customer identity must be verified first
     # Otherwise return None to allow the tool call.
+    if tool_name == "process_refund" and "get_customer" not in tool_history:
+        return {
+            "error": True,
+            "errorCategory": "validation",
+            "isRetryable": True,
+            "message": "Customer identity must be verified first. Please call get_customer before processing a refund.",
+        }
     return None
 
 
@@ -107,7 +114,7 @@ def run_agent(user_message):
     client = anthropic.Anthropic()
     system_template = load_system_prompt()
 
-    messages = [{"role": "user", "content": user_message}]
+    messages.append({"role": "user", "content": user_message})
     tool_history = set()
     # [Task 5.1] — case_facts: verified transactional facts injected into system prompt
     case_facts = "No facts collected yet."
@@ -202,6 +209,8 @@ def run_agent(user_message):
 
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
+    messages.clear()
+
 
 
 def show_menu(test_queries):
