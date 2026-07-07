@@ -18,6 +18,7 @@ load_dotenv()
 console = Console()
 messages = []  # Conversation history
 tool_history = set() # Track which tools have been called successfully
+case_facts_data = {}  # Accumulated transactional facts, persists across turns until cleared
 
 def load_system_prompt():
     prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
@@ -29,6 +30,34 @@ def load_system_prompt():
 # --- Case facts ---
 # [Task 5.1] — extract verified facts from tool results so the model retains them
 # even when earlier conversation turns are summarized away
+
+def update_case_facts(case_facts_data, tool_name, result):
+    """Extract key transactional facts from a successful tool result."""
+    if isinstance(result, dict) and result.get("error"):
+        return case_facts_data
+
+    if tool_name == "get_customer":
+        case_facts_data["customer_id"] = result.get("customer_id")
+        case_facts_data["customer_name"] = result.get("name")
+    elif tool_name == "lookup_order":
+        case_facts_data["order_id"] = result.get("order_id")
+        case_facts_data["order_total"] = result.get("total")
+    elif tool_name == "process_refund":
+        case_facts_data["order_id"] = result.get("order_id")
+        case_facts_data["refund_amount"] = result.get("amount")
+        case_facts_data["refund_status"] = result.get("status")
+
+    return case_facts_data
+
+
+def format_case_facts(case_facts_data):
+    """Render collected case facts as a formatted string for the system prompt."""
+    if not case_facts_data:
+        return "No facts collected yet."
+
+    lines = [f"{key}: {value}" for key, value in case_facts_data.items()]
+    facts_string = "\n".join(lines)
+    return facts_string
 
 
 # --- Prerequisite gate ---
@@ -124,9 +153,11 @@ def run_agent(user_message):
     client = anthropic.Anthropic()
     system_template = load_system_prompt()
 
+    global case_facts_data
+
     messages.append({"role": "user", "content": user_message})
-    # [Task 5.1] — case_facts: verified transactional facts injected into system prompt
-    case_facts = "No facts collected yet."
+    # [Task 5.1] — case_facts: verified transactional facts, persisted across turns
+    case_facts = format_case_facts(case_facts_data)
 
     print(f"\n{CYAN}{BOLD}{'='*60}")
     print(f"Customer: {user_message}")
@@ -188,6 +219,11 @@ def run_agent(user_message):
                     print(f"  {DIM}Result:{RESET}")
                     console.print(JSON(json.dumps(result, indent=2)), style="dim")
 
+                    # [Task 5.1] — update and surface case_facts after each tool result
+                    case_facts_data = update_case_facts(case_facts_data, block.name, result)
+                    case_facts = format_case_facts(case_facts_data)
+                    print(f"  {DIM}Updated case_facts: {case_facts}{RESET}")
+
                     tool_result_block = {
                         "type": "tool_result",
                         "tool_use_id": block.id,
@@ -221,6 +257,7 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
     messages.clear()
     tool_history.clear()
+    case_facts_data.clear()
 
 
 
