@@ -73,12 +73,13 @@ def check_prerequisite(tool_name, tool_history):
     #   message: explaining that customer identity must be verified first
     # Otherwise return None to allow the tool call.
     if tool_name == "process_refund" and "get_customer" not in tool_history:
-        return {
+        result = {
             "error": True,
             "errorCategory": "validation",
             "isRetryable": True,
             "message": "Customer identity must be verified first. Please call get_customer before processing a refund.",
         }
+        return result
     return None
 
 
@@ -99,12 +100,13 @@ def post_tool_use_hook(tool_name, tool_input, tool_result):
     #   message: explaining the amount exceeds the $500 limit and must be escalated
     #   action: "escalate_to_human"
     # Otherwise return tool_result unchanged.
-    if tool_name == "process_refund" and tool_input["amount"] > MAX_REFUND_AMOUNT:
+    refund_amount = tool_input.get("amount", 0)
+    if tool_name == "process_refund" and refund_amount > MAX_REFUND_AMOUNT:
         result = {
             "error": True,
             "errorCategory": "policy_violation",
             "isRetryable": False,
-            "message": f"Refund amount ${tool_input['amount']:.2f} exceeds the $500 limit. Escalation to a human agent is required.",
+            "message": f"Refund amount ${refund_amount:.2f} exceeds the $500 limit. Escalation to a human agent is required.",
             "action": "escalate_to_human",
         }
         return result
@@ -156,8 +158,9 @@ def run_agent(user_message):
     global case_facts_data
 
     messages.append({"role": "user", "content": user_message})
-    # [Task 5.1] — case_facts: verified transactional facts, persisted across turns
-    case_facts = format_case_facts(case_facts_data)
+    # [Task 1.4] — reset the prerequisite gate each turn so identity verification
+    # cannot leak across different customers within a persistent session
+    tool_history.clear()
 
     print(f"\n{CYAN}{BOLD}{'='*60}")
     print(f"Customer: {user_message}")
@@ -166,6 +169,9 @@ def run_agent(user_message):
     for iteration in range(MAX_LOOP_ITERATIONS):
         print(f"\n{DIM}--- Iteration {iteration + 1} ---{RESET}")
 
+        # [Task 5.1] — case_facts: verified transactional facts, persisted across
+        # turns; recomputed each iteration to reflect the latest tool results
+        case_facts = format_case_facts(case_facts_data)
         # [Task 5.1] — format system prompt template with current case_facts
         system_prompt = system_template.format(case_facts=case_facts)
         print(f"  {DIM}case_facts: {case_facts}{RESET}")
@@ -200,6 +206,10 @@ def run_agent(user_message):
 
         # [Task 1.1] — check stop_reason to decide whether to continue or stop
         if response.stop_reason == "end_turn":
+            # [Task 1.1] — record the assistant's final reply so persistent
+            # history stays coherent across turns
+            assistant_message = {"role": "assistant", "content": response.content}
+            messages.append(assistant_message)
             # Extract the final text response
             for block in response.content:
                 if hasattr(block, "text"):
