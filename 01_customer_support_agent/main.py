@@ -16,7 +16,9 @@ from tools import ALL_TOOLS, TOOL_FUNCTIONS
 load_dotenv()
 
 console = Console()
-
+messages = []  # Conversation history
+tool_history = set() # Track which tools have been called successfully
+case_facts_data = {}  # Accumulated transactional facts, persists across turns until cleared
 
 def load_system_prompt():
     prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
@@ -29,19 +31,55 @@ def load_system_prompt():
 # [Task 5.1] — extract verified facts from tool results so the model retains them
 # even when earlier conversation turns are summarized away
 
+def update_case_facts(case_facts_data, tool_name, result):
+    """Extract key transactional facts from a successful tool result."""
+    if isinstance(result, dict) and result.get("error"):
+        return case_facts_data
+
+    if tool_name == "get_customer":
+        case_facts_data["customer_id"] = result.get("customer_id")
+        case_facts_data["customer_name"] = result.get("name")
+    elif tool_name == "lookup_order":
+        case_facts_data["order_id"] = result.get("order_id")
+        case_facts_data["order_total"] = result.get("total")
+    elif tool_name == "process_refund":
+        case_facts_data["order_id"] = result.get("order_id")
+        case_facts_data["refund_amount"] = result.get("amount")
+        case_facts_data["refund_status"] = result.get("status")
+
+    return case_facts_data
+
+
+def format_case_facts(case_facts_data):
+    """Render collected case facts as a formatted string for the system prompt."""
+    if not case_facts_data:
+        return "No facts collected yet."
+
+    lines = [f"{key}: {value}" for key, value in case_facts_data.items()]
+    facts_string = "\n".join(lines)
+    return facts_string
+
 
 # --- Prerequisite gate ---
 # [Task 1.4] — programmatic enforcement: block process_refund until get_customer has run
 
 def check_prerequisite(tool_name, tool_history):
     """Block process_refund unless get_customer has already been called successfully."""
-    # TODO: Check if tool_name is "process_refund" and if "get_customer" is NOT
+    # Check if tool_name is "process_refund" and if "get_customer" is NOT
     # in tool_history. If the prerequisite is missing, return a dict with:
     #   error: True
     #   errorCategory: "validation"
     #   isRetryable: True
     #   message: explaining that customer identity must be verified first
     # Otherwise return None to allow the tool call.
+    if tool_name == "process_refund" and "get_customer" not in tool_history:
+        result = {
+            "error": True,
+            "errorCategory": "validation",
+            "isRetryable": True,
+            "message": "Customer identity must be verified first. Please call get_customer before processing a refund.",
+        }
+        return result
     return None
 
 
@@ -54,7 +92,7 @@ def post_tool_use_hook(tool_name, tool_input, tool_result):
     Checks process_refund calls: if the refund amount exceeds MAX_REFUND_AMOUNT,
     replace the result with a structured error redirecting to escalation.
     """
-    # TODO: Check if tool_name is "process_refund" and if tool_input["amount"]
+    # Check if tool_name is "process_refund" and if tool_input["amount"]
     # exceeds MAX_REFUND_AMOUNT. If it does, return a replacement result dict with:
     #   error: True
     #   errorCategory: "policy_violation"
@@ -62,6 +100,16 @@ def post_tool_use_hook(tool_name, tool_input, tool_result):
     #   message: explaining the amount exceeds the $500 limit and must be escalated
     #   action: "escalate_to_human"
     # Otherwise return tool_result unchanged.
+    refund_amount = tool_input.get("amount", 0)
+    if tool_name == "process_refund" and refund_amount > MAX_REFUND_AMOUNT:
+        result = {
+            "error": True,
+            "errorCategory": "policy_violation",
+            "isRetryable": False,
+            "message": f"Refund amount ${refund_amount:.2f} exceeds the $500 limit. Escalation to a human agent is required.",
+            "action": "escalate_to_human",
+        }
+        return result
     return tool_result
 
 
@@ -107,10 +155,12 @@ def run_agent(user_message):
     client = anthropic.Anthropic()
     system_template = load_system_prompt()
 
-    messages = [{"role": "user", "content": user_message}]
-    tool_history = set()
-    # [Task 5.1] — case_facts: verified transactional facts injected into system prompt
-    case_facts = "No facts collected yet."
+    global case_facts_data
+
+    messages.append({"role": "user", "content": user_message})
+    # [Task 1.4] — reset the prerequisite gate each turn so identity verification
+    # cannot leak across different customers within a persistent session
+    tool_history.clear()
 
     print(f"\n{CYAN}{BOLD}{'='*60}")
     print(f"Customer: {user_message}")
@@ -119,6 +169,9 @@ def run_agent(user_message):
     for iteration in range(MAX_LOOP_ITERATIONS):
         print(f"\n{DIM}--- Iteration {iteration + 1} ---{RESET}")
 
+        # [Task 5.1] — case_facts: verified transactional facts, persisted across
+        # turns; recomputed each iteration to reflect the latest tool results
+        case_facts = format_case_facts(case_facts_data)
         # [Task 5.1] — format system prompt template with current case_facts
         system_prompt = system_template.format(case_facts=case_facts)
         print(f"  {DIM}case_facts: {case_facts}{RESET}")
@@ -130,6 +183,7 @@ def run_agent(user_message):
                     max_tokens=1024,
                     system=system_prompt,
                     tools=ALL_TOOLS,
+                    tool_choice={"type": "auto", "disable_parallel_tool_use": True},
                     messages=messages,
                 )
         except Exception as e:
@@ -152,6 +206,10 @@ def run_agent(user_message):
 
         # [Task 1.1] — check stop_reason to decide whether to continue or stop
         if response.stop_reason == "end_turn":
+            # [Task 1.1] — record the assistant's final reply so persistent
+            # history stays coherent across turns
+            assistant_message = {"role": "assistant", "content": response.content}
+            messages.append(assistant_message)
             # Extract the final text response
             for block in response.content:
                 if hasattr(block, "text"):
@@ -170,6 +228,11 @@ def run_agent(user_message):
                     result = execute_tool(block.name, block.input, tool_history)
                     print(f"  {DIM}Result:{RESET}")
                     console.print(JSON(json.dumps(result, indent=2)), style="dim")
+
+                    # [Task 5.1] — update and surface case_facts after each tool result
+                    case_facts_data = update_case_facts(case_facts_data, block.name, result)
+                    case_facts = format_case_facts(case_facts_data)
+                    print(f"  {DIM}Updated case_facts: {case_facts}{RESET}")
 
                     tool_result_block = {
                         "type": "tool_result",
@@ -202,6 +265,10 @@ def run_agent(user_message):
 
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
+    messages.clear()
+    tool_history.clear()
+    case_facts_data.clear()
+
 
 
 def show_menu(test_queries):
