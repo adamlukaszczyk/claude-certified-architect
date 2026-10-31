@@ -1,0 +1,49 @@
+# phase-3-powder.yaml — Powder/Freeride deep dive (showIf: isPowderFocused)
+
+- id: backcountry_vs_resort
+  phase: 3
+  text: "Where do you ride powder?"
+  showIf: isPowderFocused
+  options:
+    - id: resort_only
+      text: "Resort only — lift-accessed powder days"
+      weights: { taper: 1, float: 1, setback: 1 }
+    - id: resort_some_bc
+      text: "Mostly resort, some backcountry"
+      weights: { taper: 2, float: 2, setback: 2 }
+    - id: equal_split
+      text: "Equal split between resort and backcountry"
+      weights: { taper: 2, float: 2, setback: 3 }
+    - id: mostly_bc
+      text: "Mostly backcountry, inbounds when necessary"
+      weights: { taper: 3, float: 3, setback: 3 }
+
+- id: touring_needs
+  phase: 3
+  text: "Do you need splitboard / touring capability?"
+  showIf: splitboardCandidate
+  options:
+    - id: no_touring
+      text: "No — I hike in or lift access only"
+      weights: {}
+    - id: light_touring
+      text: "Light touring — occasional skin tracks"
+      weights: { flex: 1 }
+    - id: full_touring
+      text: "Full touring setup — multi-day missions"
+      weights: { flex: 2, base: 1 }
+
+- id: taper_preference
+  phase: 3
+  text: "How surfy do you want your board to feel in powder?"
+  showIf: needsTaperQuestion
+  options:
+    - id: low_taper
+      text: "Stable and predictable"
+      weights: { taper: -1, float: 0 }
+    - id: mid_taper
+      text: "Balanced float"
+      weights: { taper: 0, float: 1 }
+    - id: high_taper
+      text: "Max float, surfy feel"
+      weights: { taper: 2, float: 2 }

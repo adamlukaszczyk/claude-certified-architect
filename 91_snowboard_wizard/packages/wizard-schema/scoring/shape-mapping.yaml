@@ -1,0 +1,19 @@
+# shape-mapping.yaml — raw shape score → board shape
+dimension: shape
+mappings:
+  - scoreRange: [-999, -2]
+    value: "twin"
+    label: "True Twin"
+    description: "Identical nose and tail — perfect for switch riding and freestyle"
+  - scoreRange: [-1, 1]
+    value: "directional-twin"
+    label: "Directional Twin"
+    description: "Slightly directional twin — versatile all-mountain with slight powder bias"
+  - scoreRange: [2, 4]
+    value: "directional"
+    label: "Directional"
+    description: "Distinct nose and tail — optimized for one direction, freeride and carving"
+  - scoreRange: [5, 999]
+    value: "tapered-directional"
+    label: "Tapered Directional"
+    description: "Wider nose, narrower tail — maximum powder float and surf feel"

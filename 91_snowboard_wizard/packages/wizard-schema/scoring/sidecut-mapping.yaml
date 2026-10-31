@@ -1,0 +1,15 @@
+# sidecut-mapping.yaml — raw sidecut score → sidecut radius description
+dimension: sidecut
+mappings:
+  - scoreRange: [-999, -1]
+    value: "short"
+    label: "Short Radius (< 7m)"
+    description: "Quick, tight turns — agile park and mogul riding"
+  - scoreRange: [0, 2]
+    value: "medium"
+    label: "Medium Radius (7–9m)"
+    description: "Versatile — comfortable at varied speeds and terrain"
+  - scoreRange: [3, 999]
+    value: "long"
+    label: "Long Radius (> 9m)"
+    description: "Drawn-out GS arcs — high-speed carving and freeride"

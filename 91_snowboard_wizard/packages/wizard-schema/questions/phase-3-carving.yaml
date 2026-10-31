@@ -1,0 +1,31 @@
+# phase-3-carving.yaml — Carving deep dive (showIf: isCarving)
+
+- id: turn_radius
+  phase: 3
+  text: "What turn radius feels best for you?"
+  showIf: isCarving
+  options:
+    - id: short_tight
+      text: "Short, tight arcs — quick pivoting, slalom-style"
+      weights: { sidecut: -2, camber: 2 }
+    - id: medium_arcs
+      text: "Medium arcs — versatile, all-mountain carving"
+      weights: { sidecut: 0, camber: 1 }
+    - id: long_arcs
+      text: "Long, drawn-out GS arcs — speed and drive"
+      weights: { sidecut: 2, camber: 3, flex: 2 }
+
+- id: edge_aggression
+  phase: 3
+  text: "How aggressive are you on edge?"
+  showIf: isCarving
+  options:
+    - id: relaxed
+      text: "Relaxed — I enjoy carving but don't chase speed"
+      weights: { flex: -1, camber: 1 }
+    - id: moderate
+      text: "Moderate — committed arcs, controlled aggression"
+      weights: { flex: 1, camber: 2 }
+    - id: full_send
+      text: "Full send — knees in the snow, maximum angle"
+      weights: { flex: 3, camber: 3, sidecut: 2 }

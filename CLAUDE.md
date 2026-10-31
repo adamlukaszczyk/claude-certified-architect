@@ -82,3 +82,8 @@ These apply across all labs:
 A standalone, hands-on workshop for building an **MCP (Model Context Protocol) client and server** from scratch — separate from the numbered certification labs. It implements "MCP Chat", a CLI app that connects an Anthropic chat loop to a FastMCP server and demonstrates the three core MCP primitives (**tools**, **resources**, **prompts**) end to end. For its purpose, architecture, and `uv` / `pyproject.toml` setup, see the [MCP Workshop section in `README.md`](README.md#mcp-workshop) and the [subproject README](90_mcp_workshop/README.md) — not repeated here.
 
 **Conventions:** unlike the numbered labs, this workshop does **not** follow the lab conventions documented above (no `config.py`, no `manage.py` restart/solve flow, prompts as inline strings, `raise ValueError` for tool errors). Treat it on its own terms; do not "fix" it to match the lab conventions unless explicitly asked. Parts of the server (e.g. the `summarize` prompt) are intentionally left as `# TODO` for participants to implement.
+
+
+# GIT
+
+- for each commit message where LLM was used to generate code add "AI_ASSISTED" in new line at the end of commit message

@@ -1,0 +1,23 @@
+# flex-mapping.yaml — raw flex score → flex rating (1–10) and label
+dimension: flex
+mappings:
+  - scoreRange: [-999, -4]
+    value: 2
+    label: "Very Soft"
+    description: "Maximum forgiveness, ideal for beginners and butter-focused freestyle"
+  - scoreRange: [-3, 0]
+    value: 3
+    label: "Soft"
+    description: "Forgiving and playful, ideal for park and beginner/intermediate"
+  - scoreRange: [1, 4]
+    value: 5
+    label: "Medium"
+    description: "Versatile for all-mountain riding in varied conditions"
+  - scoreRange: [5, 8]
+    value: 7
+    label: "Medium-Stiff"
+    description: "Responsive and precise, good for advanced all-mountain and carving"
+  - scoreRange: [9, 999]
+    value: 9
+    label: "Stiff"
+    description: "Maximum response and stability at speed, for expert riders"

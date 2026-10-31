@@ -1,0 +1,19 @@
+# float-mapping.yaml — raw float score → powder float priority label
+dimension: float
+mappings:
+  - scoreRange: [-999, 1]
+    value: "low"
+    label: "Low Float Priority"
+    description: "Hardpack and groomed performance prioritized over powder float"
+  - scoreRange: [2, 4]
+    value: "medium"
+    label: "Moderate Float"
+    description: "Balanced powder capability alongside groomed performance"
+  - scoreRange: [5, 8]
+    value: "high"
+    label: "High Float"
+    description: "Powder performance is the primary consideration"
+  - scoreRange: [9, 999]
+    value: "maximum"
+    label: "Maximum Float"
+    description: "Every spec optimized for deep snow — dedicated powder quiver"

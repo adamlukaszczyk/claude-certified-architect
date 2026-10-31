@@ -1,0 +1,96 @@
+{
+  "services": [
+    {
+      "id": "api",
+      "name": "api",
+      "address": "api",
+      "port": 3001,
+      "tags": ["nestjs", "http"],
+      "meta": {
+        "metrics-dashboard-url": "http://localhost:9090/graph?g0.expr=up{job=\"api\"}"
+      },
+      "checks": [
+        {
+          "id": "api-health",
+          "name": "API HTTP health",
+          "http": "http://api:3001/api/health",
+          "interval": "10s",
+          "timeout": "3s",
+          "deregister_critical_service_after": "30s"
+        }
+      ]
+    },
+    {
+      "id": "postgres",
+      "name": "postgres",
+      "address": "postgres",
+      "port": 5432,
+      "tags": ["database", "postgresql"],
+      "meta": {
+        "metrics-dashboard-url": "http://localhost:5050"
+      }
+    },
+    {
+      "id": "redis",
+      "name": "redis",
+      "address": "redis",
+      "port": 6379,
+      "tags": ["cache", "redis"],
+      "meta": {
+        "metrics-dashboard-url": "http://localhost:5540"
+      }
+    },
+    {
+      "id": "redis-exporter",
+      "name": "redis-exporter",
+      "address": "redis-exporter",
+      "port": 9121,
+      "tags": ["metrics", "exporter"]
+    },
+    {
+      "id": "postgres-exporter",
+      "name": "postgres-exporter",
+      "address": "postgres-exporter",
+      "port": 9187,
+      "tags": ["metrics", "exporter"]
+    },
+    {
+      "id": "pgadmin",
+      "name": "pgadmin",
+      "address": "pgadmin",
+      "port": 80,
+      "tags": ["ui", "postgresql"],
+      "meta": {
+        "metrics-dashboard-url": "http://localhost:5050"
+      },
+      "checks": [
+        {
+          "id": "pgadmin-health",
+          "name": "pgAdmin HTTP health",
+          "http": "http://pgadmin:80/misc/ping",
+          "interval": "15s",
+          "timeout": "5s"
+        }
+      ]
+    },
+    {
+      "id": "redisinsight",
+      "name": "redisinsight",
+      "address": "redisinsight",
+      "port": 5540,
+      "tags": ["ui", "redis"],
+      "meta": {
+        "metrics-dashboard-url": "http://localhost:5540"
+      },
+      "checks": [
+        {
+          "id": "redisinsight-health",
+          "name": "RedisInsight HTTP health",
+          "http": "http://redisinsight:5540/api/health/",
+          "interval": "15s",
+          "timeout": "5s"
+        }
+      ]
+    }
+  ]
+}

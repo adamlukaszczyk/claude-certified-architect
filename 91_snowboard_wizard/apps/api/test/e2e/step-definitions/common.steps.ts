@@ -1,0 +1,281 @@
+// common.steps.ts - Shared step definitions: HTTP calls, assertions, cookie helpers
+import request from 'supertest'
+import assert from 'node:assert'
+import { Given, When, Then, DataTable } from '@cucumber/cucumber'
+import type { ApiWorld } from '../support/world'
+
+// ── Setup / Context ──────────────────────────────────────────────────────────
+
+Given('the API is running', function(this: ApiWorld) {
+  // no-op: assumes a live stack is running at this.baseUrl
+})
+
+Given('I have no auth credentials', function(this: ApiWorld) {
+  // no-op: cookie jar is empty by default (reset in Before hook)
+})
+
+Given('the next request will have no Origin or Referer header', function(this: ApiWorld) {
+  return 'pending'
+})
+
+// ── GET requests ─────────────────────────────────────────────────────────────
+
+When('I send GET {string}', async function(this: ApiWorld, _path: string) {
+  return 'pending'
+})
+
+When('I send GET {string} without auth credentials', async function(this: ApiWorld, _path: string) {
+  return 'pending'
+})
+
+When('I send GET {string} with my access token', async function(this: ApiWorld, _path: string) {
+  return 'pending'
+})
+
+When('I send GET {string} with a tampered JWT in the Authorization header', async function(this: ApiWorld, _path: string) {
+  return 'pending'
+})
+
+// Intercept bare path steps used in feature files (e.g. "I send GET /api/health")
+When(/^I send GET \/api\/health$/, async function(this: ApiWorld) {
+  const res = await request(this.baseUrl).get('/api/health')
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+When(/^I send GET \/api\/auth\/me with my access token$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send GET \/api\/auth\/me without auth credentials$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send GET \/api\/auth\/me with a tampered JWT in the Authorization header$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send GET \/api\/sessions\/(.+)$/, async function(this: ApiWorld, id: string) {
+  const resolvedId = this.resolve(id)
+  const res = await request(this.baseUrl).get(`/api/sessions/${resolvedId}`)
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+When(/^I send GET \/api\/recommendations\/([^/]+)\/pdf$/, async function(this: ApiWorld, _id: string) {
+  return 'pending'
+})
+
+When(/^I send GET \/api\/recommendations\/share\/(.+) without auth credentials$/, async function(this: ApiWorld, token: string) {
+  // capturedValues lookup handles bare-string aliases (share.feature Background)
+  // this.resolve() handles <placeholder> syntax (journey feature)
+  const resolvedToken = this.capturedValues[token] ?? this.resolve(token)
+  const res = await request(this.baseUrl).get(`/api/recommendations/share/${resolvedToken}`)
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+When(/^I send GET \/api\/recommendations\/([^/]+) without auth credentials$/, async function(this: ApiWorld, id: string) {
+  const resolvedId = this.resolve(id)
+  const res = await request(this.baseUrl).get(`/api/recommendations/${resolvedId}`)
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+When(/^I send GET \/api\/recommendations\/([^/]+) with my access token$/, async function(this: ApiWorld, _id: string) {
+  return 'pending'
+})
+
+// ── POST requests ─────────────────────────────────────────────────────────────
+
+When(/^I send POST \/api\/auth\/google with body:$/, async function(this: ApiWorld, _table: DataTable) {
+  return 'pending'
+})
+
+When(/^I send POST \/api\/auth\/google with an empty body$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send POST \/api\/auth\/refresh$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send POST \/api\/auth\/refresh with no Origin or Referer header$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send POST \/api\/auth\/logout$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send POST \/api\/score with JSON body:$/, async function(this: ApiWorld, body: string) {
+  const res = await request(this.baseUrl)
+    .post('/api/score')
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send(JSON.parse(body))
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+When(/^I send POST \/api\/score with an empty body$/, async function(this: ApiWorld) {
+  return 'pending'
+})
+
+When(/^I send POST \/api\/recommendations with JSON body:$/, async function(this: ApiWorld, body: string) {
+  const res = await request(this.baseUrl)
+    .post('/api/recommendations')
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send(JSON.parse(body))
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+When(/^I send POST \/api\/recommendations with my access token and JSON body:$/, async function(this: ApiWorld, _body: string) {
+  return 'pending'
+})
+
+// ── PUT requests ──────────────────────────────────────────────────────────────
+
+When(/^I send PUT \/api\/sessions\/(.+) with JSON body:$/, async function(this: ApiWorld, id: string, body: string) {
+  const resolvedId = this.resolve(id)
+  const res = await request(this.baseUrl)
+    .put(`/api/sessions/${resolvedId}`)
+    .set('Origin', this.csrfOrigin()!)
+    .set('Content-Type', 'application/json')
+    .send(JSON.parse(body))
+  this.response = { status: res.status, body: res.body, headers: res.headers as Record<string, string | string[]> }
+})
+
+// ── Response assertions ───────────────────────────────────────────────────────
+
+Then('the response status is {int}', function(this: ApiWorld, expectedStatus: number) {
+  assert.strictEqual(
+    this.response!.status,
+    expectedStatus,
+    `expected status ${expectedStatus} but got ${this.response!.status}: ${JSON.stringify(this.response!.body)}`,
+  )
+})
+
+Then('the response body field {string} is {string}', function(this: ApiWorld, field: string, rawExpected: string) {
+  const actual = this.getField(this.response!.body, field)
+  const expected = this.capturedValues[rawExpected] ?? rawExpected
+  assert.strictEqual(
+    String(actual),
+    expected,
+    `expected field "${field}" to equal "${expected}" but got "${actual}"`,
+  )
+})
+
+Then('the response body field {string} is the number {int}', function(this: ApiWorld, field: string, expected: number) {
+  const actual = this.getField(this.response!.body, field)
+  assert.strictEqual(actual, expected, `expected field "${field}" to be ${expected} but got ${actual}`)
+})
+
+Then('the response body field {string} is greater than {int}', function(this: ApiWorld, _field: string, _threshold: number) {
+  return 'pending'
+})
+
+Then('the response body field {string} is less than {int}', function(this: ApiWorld, _field: string, _threshold: number) {
+  return 'pending'
+})
+
+Then('the response body field {string} is a non-empty string', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    typeof actual === 'string' && actual.length > 0,
+    `expected field "${field}" to be a non-empty string but got ${JSON.stringify(actual)}`,
+  )
+})
+
+Then('the response body field {string} is a non-empty UUID', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  assert.ok(
+    typeof actual === 'string' && uuidRegex.test(actual),
+    `expected field "${field}" to be a UUID but got ${JSON.stringify(actual)}`,
+  )
+})
+
+Then('the response body field {string} is a number', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    typeof actual === 'number',
+    `expected field "${field}" to be a number but got ${typeof actual} (${actual})`,
+  )
+})
+
+Then('the response body field {string} is a number between {int} and {int}', function(this: ApiWorld, field: string, min: number, max: number) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    typeof actual === 'number' && actual >= min && actual <= max,
+    `expected field "${field}" to be a number between ${min} and ${max} but got ${actual}`,
+  )
+})
+
+Then('the response body field {string} is an object', function(this: ApiWorld, field: string) {
+  const actual = this.getField(this.response!.body, field)
+  assert.ok(
+    actual !== null && typeof actual === 'object' && !Array.isArray(actual),
+    `expected field "${field}" to be a plain object but got ${JSON.stringify(actual)}`,
+  )
+})
+
+Then('the response body field {string} matches the pattern {string}', function(this: ApiWorld, field: string, pattern: string) {
+  const actual = this.getField(this.response!.body, field)
+  const regex = new RegExp(pattern)
+  assert.ok(
+    regex.test(String(actual)),
+    `expected field "${field}" (${actual}) to match pattern /${pattern}/`,
+  )
+})
+
+Then('the response body field {string} is one of {string}', function(this: ApiWorld, field: string, csv: string) {
+  const actual = this.getField(this.response!.body, field)
+  const options = csv.split(',').map(s => s.trim())
+  assert.ok(
+    options.includes(String(actual)),
+    `expected field "${field}" to be one of [${csv}] but got "${actual}"`,
+  )
+})
+
+Then('the response body does not contain the field {string}', function(this: ApiWorld, _field: string) {
+  return 'pending'
+})
+
+Then('the response body is null', function(this: ApiWorld) {
+  return 'pending'
+})
+
+// ── Cookie assertions ─────────────────────────────────────────────────────────
+
+Then('the response sets an httpOnly cookie named {string}', function(this: ApiWorld, _name: string) {
+  return 'pending'
+})
+
+Then('the response sets a new httpOnly {string} cookie', function(this: ApiWorld, _name: string) {
+  return 'pending'
+})
+
+Then('the {string} cookie is cleared', function(this: ApiWorld, _name: string) {
+  return 'pending'
+})
+
+Then('no auth cookies are set', function(this: ApiWorld) {
+  return 'pending'
+})
+
+// ── Value capture ─────────────────────────────────────────────────────────────
+
+// "And I capture..." inherits the previous keyword (Given/When/Then), so one registration covers all forms.
+Then('I capture the {string} from the response as {string}', function(this: ApiWorld, field: string, alias: string) {
+  const value = this.getField(this.response!.body, field)
+  assert.ok(
+    value !== undefined && value !== null,
+    `cannot capture "${field}" — field is absent from response body`,
+  )
+  this.capturedValues[alias] = String(value)
+})
+
+Then('the captured values {string} and {string} are different', function(this: ApiWorld, _a: string, _b: string) {
+  return 'pending'
+})
+
+Then('the captured value {string} matches the pattern {string}', function(this: ApiWorld, _alias: string, _pattern: string) {
+  return 'pending'
+})

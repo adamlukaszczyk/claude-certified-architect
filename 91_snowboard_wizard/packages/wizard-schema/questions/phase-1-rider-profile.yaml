@@ -1,0 +1,98 @@
+# phase-1-rider-profile.yaml — Rider Profile questions (shown to all users)
+
+- id: height_category
+  phase: 1
+  text: "What is your height?"
+  options:
+    - id: under_160
+      text: "Under 160 cm (5'3\")"
+      weights: { length: -2, width: -1 }
+    - id: h_160_170
+      text: "160–170 cm (5'3\"–5'7\")"
+      weights: { length: -1, width: 0 }
+    - id: h_171_180
+      text: "171–180 cm (5'7\"–5'11\")"
+      weights: { length: 0, width: 0 }
+    - id: h_181_190
+      text: "181–190 cm (5'11\"–6'3\")"
+      weights: { length: 1, width: 1 }
+    - id: over_190
+      text: "Over 190 cm (6'3\"+)"
+      weights: { length: 2, width: 2 }
+
+- id: weight_category
+  phase: 1
+  text: "What is your weight?"
+  options:
+    - id: under_55
+      text: "Under 55 kg (120 lb)"
+      weights: { length: -3, width: -2, flex: -1 }
+    - id: w_55_70
+      text: "55–70 kg (120–155 lb)"
+      weights: { length: -1, width: -1, flex: 0 }
+    - id: w_71_85
+      text: "71–85 kg (155–185 lb)"
+      weights: { length: 1, width: 1, flex: 1 }
+    - id: w_86_100
+      text: "86–100 kg (185–220 lb)"
+      weights: { length: 2, width: 2, flex: 2 }
+    - id: over_100
+      text: "Over 100 kg (220 lb+)"
+      weights: { length: 3, width: 3, flex: 3 }
+
+- id: boot_size
+  phase: 1
+  text: "What is your boot size (US men's)?"
+  options:
+    - id: bs_7_8
+      text: "7–8"
+      weights: { width: -2 }
+    - id: bs_8_5_9_5
+      text: "8.5–9.5"
+      weights: { width: -1 }
+    - id: bs_10_11
+      text: "10–11"
+      weights: { width: 0 }
+    - id: bs_11_5_12_5
+      text: "11.5–12.5"
+      weights: { width: 1 }
+    - id: bs_13_plus
+      text: "13+"
+      weights: { width: 2 }
+
+- id: experience
+  phase: 1
+  text: "What is your riding experience level?"
+  options:
+    - id: beginner
+      text: "Beginner — first few seasons, still learning turns"
+      weights: { flex: -3, camber: -2, taper: 0 }
+    - id: intermediate
+      text: "Intermediate — comfortable on most groomed runs"
+      weights: { flex: -1, camber: -1, taper: 0 }
+    - id: advanced
+      text: "Advanced — confident in varied conditions"
+      weights: { flex: 1, camber: 1, taper: 1 }
+    - id: expert
+      text: "Expert — charge anything, any condition"
+      weights: { flex: 3, camber: 2, taper: 2 }
+
+- id: stance
+  phase: 1
+  text: "What is your foot stance?"
+  options:
+    - id: regular
+      text: "Regular (left foot forward)"
+      weights: {}
+    - id: goofy
+      text: "Goofy (right foot forward)"
+      weights: {}
+
+- id: riding_days
+  phase: 1
+  text: "How many days per season do you ride?"
+  inputType: numeric
+  answersKey: ridingDays
+  min: 1
+  max: 200
+  unit: "days/season"

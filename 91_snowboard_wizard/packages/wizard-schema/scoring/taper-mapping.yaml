@@ -1,0 +1,19 @@
+# taper-mapping.yaml — raw taper score → taper in mm
+dimension: taper
+mappings:
+  - scoreRange: [-999, 0]
+    value: 0
+    label: "No Taper (0 mm)"
+    description: "Twin tip geometry — equal width nose and tail"
+  - scoreRange: [1, 2]
+    value: 5
+    label: "Low Taper (5 mm)"
+    description: "Slight directional bias — all-mountain with a hint of float"
+  - scoreRange: [3, 4]
+    value: 15
+    label: "Medium Taper (15 mm)"
+    description: "Noticeable float improvement in powder, still versatile"
+  - scoreRange: [5, 999]
+    value: 25
+    label: "High Taper (25 mm)"
+    description: "Maximum surf feel — wide nose, narrow tail, aggressive powder bias"

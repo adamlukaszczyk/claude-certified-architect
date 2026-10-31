@@ -1,0 +1,27 @@
+# length-mapping.yaml — raw length score → board length in cm
+dimension: length
+mappings:
+  - scoreRange: [-999, -4]
+    value: 145
+    label: "145 cm"
+    description: "Short board for lightweight or youth riders, easy to maneuver"
+  - scoreRange: [-3, -1]
+    value: 150
+    label: "150 cm"
+    description: "Short, nimble — park-focused and lighter riders"
+  - scoreRange: [0, 2]
+    value: 155
+    label: "155 cm"
+    description: "Mid-length, versatile for average-build all-mountain riders"
+  - scoreRange: [3, 5]
+    value: 158
+    label: "158 cm"
+    description: "Mid-length for taller or heavier all-mountain riders"
+  - scoreRange: [6, 8]
+    value: 162
+    label: "162 cm"
+    description: "Longer board for freeride and heavier/taller riders"
+  - scoreRange: [9, 999]
+    value: 166
+    label: "166 cm"
+    description: "Full-length freeride — maximum float and high-speed stability"
