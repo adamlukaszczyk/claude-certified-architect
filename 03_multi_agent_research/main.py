@@ -161,15 +161,16 @@ _start_time = 0.0
 _case_label = "custom"
 _last_api_error = ""
 
-# The currently active agent (set when Agent tool is called)
-_current_agent = "coordinator"
-
 # --- Lab convenience: tool visibility and violation detection ---
 # NOTE: The SDK hooks do not expose which tools a subagent has access to.
 # The _agents dict and _EXPECTED_TOOLS map below are lab conveniences that
 # read from our own AgentDefinition objects — not an SDK-provided feature.
 # In production, you would track tool assignments through your own registry.
 _agents = {}
+
+# Agent tool_use_id -> subagent name. Messages from a subagent carry the spawning
+# Agent call's id as parent_tool_use_id, so this resolves them to a real name.
+_spawned_agent_names = {}
 
 _EXPECTED_TOOLS = {
     "search-agent": {"mcp__research__web_search"},
@@ -187,50 +188,50 @@ def _elapsed():
 
 async def on_pre_tool_use(hook_input, tool_use_id, context):
     """Log every tool call as it happens — gives real-time feedback."""
-    global _current_agent
     tool_name = hook_input.get("tool_name", "")
     tool_input = hook_input.get("tool_input", {})
 
     # Subagent spawn — register which agent this tool_use_id belongs to
     if tool_name in ("Task", "Agent"):
-        agent_type = tool_input.get("subagent_type", "unknown")
+        spawned_agent_name = tool_input.get("subagent_type", "unknown")
+        _spawned_agent_names[tool_use_id] = spawned_agent_name
         desc = tool_input.get("description", "")
-        _current_agent = agent_type
-        print(f"  {YELLOW}{_elapsed()} ↳ Spawning: {agent_type}{RESET}", flush=True)
+        print(f"  {YELLOW}{_elapsed()} ↳ Spawning: {spawned_agent_name}{RESET}", flush=True)
         if desc:
-            print(f"    {DIM}{desc}{RESET}", flush=True)
+            print(f"    {DIM}[{spawned_agent_name}] {desc}{RESET}", flush=True)
         # Show which tools this agent has access to
-        agent_def = _agents.get(agent_type)
+        agent_def = _agents.get(spawned_agent_name)
         if agent_def:
             agent_tools = getattr(agent_def, "tools", None)
             if agent_tools is None:
-                print(f"    {DIM}Tools: ALL (no restriction){RESET}", flush=True)
+                print(f"    {DIM}[{spawned_agent_name}] Tools: ALL (no restriction){RESET}", flush=True)
             elif len(agent_tools) == 0:
-                print(f"    {DIM}Tools: none{RESET}", flush=True)
+                print(f"    {DIM}[{spawned_agent_name}] Tools: none{RESET}", flush=True)
             else:
                 short = [t.replace("mcp__research__", "") for t in agent_tools]
-                print(f"    {DIM}Tools: {', '.join(short)}{RESET}", flush=True)
+                print(f"    {DIM}[{spawned_agent_name}] Tools: {', '.join(short)}{RESET}", flush=True)
     # MCP tool call or built-in tool — label with agent and flag violations
     else:
         is_mcp = tool_name.startswith("mcp__research__")
         short_name = tool_name.replace("mcp__research__", "") if is_mcp else tool_name
         input_summary = _format_tool_input(short_name, tool_input) if is_mcp else ""
-        label = _current_agent
+        # agent_type is only present in hook input for calls made inside a subagent
+        calling_agent_name = hook_input.get("agent_type") or "coordinator"
 
         # Check if this agent should be using this tool
-        expected = _EXPECTED_TOOLS.get(label)
+        expected = _EXPECTED_TOOLS.get(calling_agent_name)
         is_violation = expected is not None and tool_name not in expected
 
         if is_violation:
             print(
-                f"    {DIM}{_elapsed()} [{label}] → {short_name}"
+                f"    {DIM}{_elapsed()} [{calling_agent_name}] → {short_name}"
                 f"{input_summary}  {RESET}{BOLD}{RED}← ⚠ VIOLATION: should not use "
                 f"{short_name}{RESET}",
                 flush=True,
             )
         else:
             print(
-                f"    {DIM}{_elapsed()} [{label}] → {short_name}"
+                f"    {DIM}{_elapsed()} [{calling_agent_name}] → {short_name}"
                 f"{input_summary}{RESET}",
                 flush=True,
             )
@@ -244,12 +245,7 @@ async def on_post_tool_use(hook_input, tool_use_id, context):
     tool_name = hook_input.get("tool_name", "")
     tool_response = hook_input.get("tool_response", "")
 
-    # When an Agent/Task tool completes, revert to coordinator context
-    if tool_name in ("Task", "Agent"):
-        global _current_agent
-        _current_agent = "coordinator"
-
-    elif tool_name.startswith("mcp__research__"):
+    if tool_name.startswith("mcp__research__"):
         short_name = tool_name.replace("mcp__research__", "")
         resp_str = str(tool_response)
         is_error = (
@@ -290,9 +286,11 @@ def display_message(message):
         _spinner.stop()
         _spinner = None
 
-    is_subagent = (
-        hasattr(message, "parent_tool_use_id") and message.parent_tool_use_id
-    )
+    parent_tool_use_id = getattr(message, "parent_tool_use_id", None)
+    if parent_tool_use_id is None:
+        agent_name = "coordinator"
+    else:
+        agent_name = _spawned_agent_names.get(parent_tool_use_id, "subagent")
 
     # Check for content blocks (assistant messages)
     global _last_api_error
@@ -306,8 +304,7 @@ def display_message(message):
                     continue
                 if len(text) > 300:
                     text = text[:300] + "..."
-                label = "[subagent]" if is_subagent else "[coordinator]"
-                print(f"    {DIM}{label} {text}{RESET}")
+                print(f"    {DIM}[{agent_name}] {text}{RESET}")
 
     # Print final result and save report to file
     if hasattr(message, "result") and message.result:
@@ -364,9 +361,9 @@ async def run_research(topic):
         f"cited report: {topic}"
     )
 
-    global _start_time, _current_agent, _agents
+    global _start_time, _agents
     _start_time = time.time()
-    _current_agent = "coordinator"
+    _spawned_agent_names.clear()
     _agents = agents
 
     print(f"\n{CYAN}{BOLD}{'=' * 60}")
@@ -401,6 +398,7 @@ async def run_research(topic):
                 # [Task 2.3] — coordinator only needs Agent tool to spawn subagents;
                 # MCP tools are available to subagents via their tools lists
                 allowed_tools=["Agent"],
+                tools=["Agent"],
                 agents=agents,
                 mcp_servers={"research": research_server},
                 permission_mode="bypassPermissions",
