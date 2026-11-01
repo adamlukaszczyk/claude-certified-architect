@@ -41,6 +41,7 @@ def build_agents():
             # Without restriction, the agent inherits ALL tools and may
             # misuse fetch_document or other tools outside its search role.
             # Too many tools (18 vs 4-5) degrades tool selection reliability.
+            tools=["mcp__research__web_search"],
         ),
         "analysis-agent": AgentDefinition(
             # [Task 2.1] description differentiates from search agent
@@ -54,6 +55,7 @@ def build_agents():
             # Add: tools=["mcp__research__fetch_document"]
             # Agents with out-of-role tools tend to misuse them — an analysis
             # agent might attempt web searches instead of analyzing documents.
+            tools=["mcp__research__fetch_document"],
         ),
         "synthesis-agent": AgentDefinition(
             # [Task 2.1] description clarifies this agent receives data, not fetches it
@@ -69,6 +71,7 @@ def build_agents():
             # The synthesis agent receives ALL findings directly in its prompt
             # from the coordinator — it does not need any tools.
             # A synthesis agent attempting web searches violates role boundaries.
+            tools=[],
         ),
         "report-agent": AgentDefinition(
             # [Task 2.1] description clarifies this agent formats, not analyzes
@@ -83,6 +86,7 @@ def build_agents():
             # Add: tools=[]
             # The report agent receives synthesis output in its prompt and
             # returns formatted markdown — file saving is handled by main.py.
+            tools=[],
         ),
     }
     return agents
