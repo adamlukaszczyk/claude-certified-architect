@@ -2,7 +2,7 @@
 
 ## Coding conventions
 
-@import coding_standards.md
+@coding_standards.md
 
 ## Lab files
 
