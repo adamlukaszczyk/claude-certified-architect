@@ -19,7 +19,13 @@ Only if sources disagree. One bullet per disagreement with both values and sourc
 2-3 bullets max.
 
 ### Coverage Gaps
-Note any topic areas where information was not available.
+Use the coordinator's `<error_context>` to report each gap as a structured annotation. One bullet per gap, with these fields:
+- **Topic**: the topic or subtopic with incomplete coverage
+- **Attempted source**: the source (URL or query) that was attempted and the error that occurred (e.g., timeout, access denied)
+- **Partial information**: what information is available despite the failure, with source attribution, or "none"
+- **Reliability impact**: whether the gap affects the reliability of the findings above (e.g., which Key Findings rest on incomplete evidence), or "none"
+
+If no errors were reported, write "None." Do not invent gaps.
 
 ### Sources
 List of all sources referenced (publication name, date, URL).
